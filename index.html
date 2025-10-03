@@ -219,7 +219,7 @@
                         <div class="market-name">🇭🇰 Hong Kong Stocks</div>
                         <div class="market-description">HSI, HSCEI & Hong Kong equities</div>
                     </div>
-                    <div class="market-price">$50</div>
+                    <div class="market-price">$88</div>
                 </label>
 
                 <label class="market-option" data-market="sg">
@@ -228,25 +228,25 @@
                         <div class="market-name">🇸🇬 Singapore Stocks</div>
                         <div class="market-description">STI & Singapore equities</div>
                     </div>
-                    <div class="market-price">$50</div>
+                    <div class="market-price">$88</div>
                 </label>
 
-                <label class="market-option" data-market="indices">
-                    <input type="checkbox" name="market" value="INDICES" data-price="40">
+                <label class="market-option" data-market="indices_mag7">
+                    <input type="checkbox" name="market" value="INDICES_MAG7" data-price="40">
                     <div class="market-info">
-                        <div class="market-name">📊 Global Indices</div>
+                        <div class="market-name">📊Indices + 💎 Magnificent 7</div>
                         <div class="market-description">S&P 500, NASDAQ, DJI & more</div>
                     </div>
-                    <div class="market-price">$40</div>
+                    <div class="market-price">$88</div>
                 </label>
 
-                <label class="market-option" data-market="mag7">
-                    <input type="checkbox" name="market" value="MAG7" data-price="40">
+                <label class="market-option" data-market="all_markets">
+                    <input type="checkbox" name="market" value="ALL_MARKETS" data-price="40">
                     <div class="market-info">
-                        <div class="market-name">💎 Magnificent 7</div>
-                        <div class="market-description">AAPL, MSFT, GOOGL, AMZN, META, TSLA, NVDA</div>
+                        <div class="market-name"> All 3 Markets</div>
+                        <div class="market-description">Singapore + Hong Kong + Indices + Magnificent 7</div>
                     </div>
-                    <div class="market-price">$40</div>
+                    <div class="market-price">$198</div>
                 </label>
             </div>
 
@@ -286,14 +286,14 @@
     <script src="https://js.stripe.com/v3/"></script>
     <script>
         // REPLACE THIS WITH YOUR STRIPE PUBLISHABLE KEY
-        const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY_HERE');
+        const stripe = Stripe('pk_test_51SDKmPPApeZiCPK2N1DkLYgRTVIL5Jr2sqxrpJAFwFK9OuVCiur4Ayc0DwE4LL5WjD1GHwvtRG61E7Q7CKeotLij00XRaF6rnH');
 
         // REPLACE THESE WITH YOUR STRIPE PRICE IDs
         const PRICE_IDS = {
-            'HK': 'price_HK_STOCKS_ID',
-            'SG': 'price_SG_STOCKS_ID',
-            'INDICES': 'price_INDICES_ID',
-            'MAG7': 'price_MAG7_ID'
+            'HK': 'price_1SDi3pPApeZiCPK2SnT0U7jS',
+            'SG': 'price_1SDi7dPApeZiCPK21Ajpss86',
+            'INDICES_MAG7': 'price_1SDi9YPApeZiCPK2bxBhQ62N',
+            'ALL_MARKETS': 'price_1SDiAPPApeZiCPK2d8GSClAR'
         };
 
         // Calculate and update total price
