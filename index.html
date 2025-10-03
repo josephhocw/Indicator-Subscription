@@ -26,7 +26,7 @@
             background: white;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
             padding: 40px;
         }
@@ -43,159 +43,141 @@
             font-size: 16px;
         }
 
-        .market-selection {
-            margin-bottom: 30px;
-        }
-
-        .market-option {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .market-option:hover {
-            border-color: #667eea;
-            background: #f7fafc;
-        }
-
-        .market-option.selected {
-            border-color: #667eea;
-            background: #edf2f7;
-        }
-
-        .market-option input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            margin-right: 12px;
-            cursor: pointer;
-        }
-
-        .market-info {
-            flex: 1;
-        }
-
-        .market-name {
-            font-weight: 600;
-            color: #2d3748;
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-
-        .market-description {
-            color: #718096;
-            font-size: 14px;
-        }
-
-        .market-price {
-            font-weight: 700;
-            color: #667eea;
-            font-size: 18px;
-        }
-
-        .user-details {
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            color: #4a5568;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        input[type="text"],
-        input[type="email"] {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-
-        input[type="text"]:focus,
-        input[type="email"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .total-section {
-            background: #f7fafc;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-
-        .total-label {
-            color: #718096;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-
-        .total-amount {
-            font-size: 36px;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        .total-period {
-            color: #718096;
-            font-size: 18px;
-        }
-
-        .subscribe-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .subscribe-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .subscribe-btn:active {
-            transform: translateY(0);
-        }
-
-        .subscribe-btn:disabled {
-            background: #cbd5e0;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .error-message {
-            color: #e53e3e;
-            font-size: 14px;
-            margin-top: 10px;
-            display: none;
-        }
-
         .info-message {
             background: #edf2f7;
             border-left: 4px solid #667eea;
             padding: 12px;
             border-radius: 4px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             font-size: 14px;
             color: #4a5568;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .plan-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .plan-card:hover {
+            border-color: #667eea;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .plan-card.featured {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            position: relative;
+        }
+
+        .plan-card.featured::before {
+            content: "POPULAR";
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .plan-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .plan-description {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 16px;
+            min-height: 40px;
+        }
+
+        .plan-price {
+            font-size: 36px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+
+        .plan-period {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 16px;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .plan-features li {
+            padding: 6px 0;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .plan-features li::before {
+            content: "✓";
+            color: #48bb78;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .plan-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            text-align: center;
+        }
+
+        .plan-card:hover .plan-button {
+            transform: scale(1.02);
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 40px 0 20px 0;
+            text-align: center;
+        }
+
+        .divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 30px 0;
+        }
+
+        @media (max-width: 768px) {
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -206,189 +188,128 @@
         <p class="subtitle">Subscribe to premium market signals and indicators</p>
 
         <div class="info-message">
-            ✨ Select the markets you want to track. You can choose one or multiple markets.
+            ✨ Choose your subscription plan. Each plan includes TradingView indicator access and exclusive Telegram
+            signal groups.
         </div>
 
-        <form id="subscription-form">
-            <div class="market-selection">
-                <h3 style="margin-bottom: 16px; color: #2d3748;">Select Your Markets</h3>
+        <!-- Single Market Plans -->
+        <div class="plans-grid">
+            <a href="YOUR_HK_PAYMENT_LINK" class="plan-card">
+                <div class="plan-name">🇭🇰 Hong Kong Stocks</div>
+                <div class="plan-description">HSI, HSCEI & Hong Kong equities</div>
+                <div class="plan-price">$88</div>
+                <div class="plan-period">per month</div>
+                <ul class="plan-features">
+                    <li>Hong Kong stocks signals</li>
+                    <li>TradingView indicator access</li>
+                    <li>Telegram group access</li>
+                </ul>
+                <div class="plan-button">Subscribe Now</div>
+            </a>
 
-                <label class="market-option" data-market="hk">
-                    <input type="checkbox" name="market" value="HK" data-price="50">
-                    <div class="market-info">
-                        <div class="market-name">🇭🇰 Hong Kong Stocks</div>
-                        <div class="market-description">HSI, HSCEI & Hong Kong equities</div>
-                    </div>
-                    <div class="market-price">$88</div>
-                </label>
+            <a href="YOUR_SG_PAYMENT_LINK" class="plan-card">
+                <div class="plan-name">🇸🇬 Singapore Stocks</div>
+                <div class="plan-description">STI & Singapore equities</div>
+                <div class="plan-price">$88</div>
+                <div class="plan-period">per month</div>
+                <ul class="plan-features">
+                    <li>Singapore stocks signals</li>
+                    <li>TradingView indicator access</li>
+                    <li>Telegram group access</li>
+                </ul>
+                <div class="plan-button">Subscribe Now</div>
+            </a>
 
-                <label class="market-option" data-market="sg">
-                    <input type="checkbox" name="market" value="SG" data-price="50">
-                    <div class="market-info">
-                        <div class="market-name">🇸🇬 Singapore Stocks</div>
-                        <div class="market-description">STI & Singapore equities</div>
-                    </div>
-                    <div class="market-price">$88</div>
-                </label>
+            <a href="YOUR_INDICES_MAG7_PAYMENT_LINK" class="plan-card">
+                <div class="plan-name">📊💎 Indices + Mag 7</div>
+                <div class="plan-description">S&P 500, NASDAQ, DJI & Magnificent 7</div>
+                <div class="plan-price">$88</div>
+                <div class="plan-period">per month</div>
+                <ul class="plan-features">
+                    <li>Global indices signals</li>
+                    <li>Magnificent 7 stocks</li>
+                    <li>TradingView indicator access</li>
+                    <li>Telegram group access</li>
+                </ul>
+                <div class="plan-button">Subscribe Now</div>
+            </a>
+        </div>
 
-                <label class="market-option" data-market="indices_mag7">
-                    <input type="checkbox" name="market" value="INDICES_MAG7" data-price="40">
-                    <div class="market-info">
-                        <div class="market-name">📊Indices + 💎 Magnificent 7</div>
-                        <div class="market-description">S&P 500, NASDAQ, DJI & more</div>
-                    </div>
-                    <div class="market-price">$88</div>
-                </label>
+        <div class="divider"></div>
+        <div class="section-title">💼 Combo Plans - Save More</div>
 
-                <label class="market-option" data-market="all_markets">
-                    <input type="checkbox" name="market" value="ALL_MARKETS" data-price="40">
-                    <div class="market-info">
-                        <div class="market-name"> All 3 Markets</div>
-                        <div class="market-description">Singapore + Hong Kong + Indices + Magnificent 7</div>
-                    </div>
-                    <div class="market-price">$198</div>
-                </label>
-            </div>
+        <!-- Combo Plans -->
+        <div class="plans-grid">
+            <a href="YOUR_HK_SG_PAYMENT_LINK" class="plan-card">
+                <div class="plan-name">🇭🇰🇸🇬 Asian Stocks Bundle</div>
+                <div class="plan-description">Hong Kong + Singapore stocks</div>
+                <div class="plan-price">$158</div>
+                <div class="plan-period">per month</div>
+                <ul class="plan-features">
+                    <li>HK & SG stocks signals</li>
+                    <li>TradingView indicator access</li>
+                    <li>2 Telegram groups</li>
+                    <li>Save $18/month</li>
+                </ul>
+                <div class="plan-button">Subscribe Now</div>
+            </a>
 
-            <div class="total-section">
-                <div class="total-label">Monthly Subscription Total</div>
-                <div>
-                    <span class="total-amount">$<span id="total-price">0</span></span>
-                    <span class="total-period">/month</span>
-                </div>
-            </div>
+            <a href="YOUR_HK_INDICES_MAG7_PAYMENT_LINK" class="plan-card">
+                <div class="plan-name">🇭🇰📊💎 HK + US Markets</div>
+                <div class="plan-description">Hong Kong + Indices + Magnificent 7</div>
+                <div class="plan-price">$158</div>
+                <div class="plan-period">per month</div>
+                <ul class="plan-features">
+                    <li>HK stocks + US markets</li>
+                    <li>Global indices & Mag 7</li>
+                    <li>TradingView indicator access</li>
+                    <li>2 Telegram groups</li>
+                    <li>Save $18/month</li>
+                </ul>
+                <div class="plan-button">Subscribe Now</div>
+            </a>
 
-            <div class="user-details">
-                <h3 style="margin-bottom: 16px; color: #2d3748;">Your Details</h3>
+            <a href="YOUR_SG_INDICES_MAG7_PAYMENT_LINK" class="plan-card">
+                <div class="plan-name">🇸🇬📊💎 SG + US Markets</div>
+                <div class="plan-description">Singapore + Indices + Magnificent 7</div>
+                <div class="plan-price">$158</div>
+                <div class="plan-period">per month</div>
+                <ul class="plan-features">
+                    <li>SG stocks + US markets</li>
+                    <li>Global indices & Mag 7</li>
+                    <li>TradingView indicator access</li>
+                    <li>2 Telegram groups</li>
+                    <li>Save $18/month</li>
+                </ul>
+                <div class="plan-button">Subscribe Now</div>
+            </a>
+        </div>
 
-                <div class="form-group">
-                    <label for="email">Email Address *</label>
-                    <input type="email" id="email" name="email" required placeholder="your@email.com">
-                </div>
+        <div class="divider"></div>
 
-                <div class="form-group">
-                    <label for="tradingview">TradingView Username *</label>
-                    <input type="text" id="tradingview" name="tradingview" required
-                        placeholder="Your TradingView username">
-                </div>
+        <!-- All Markets Plan -->
+        <div class="plans-grid" style="grid-template-columns: 1fr;">
+            <a href="YOUR_ALL_MARKETS_PAYMENT_LINK" class="plan-card featured">
+                <div class="plan-name">🌍 All Markets - Complete Access</div>
+                <div class="plan-description">Hong Kong + Singapore + Indices + Magnificent 7</div>
+                <div class="plan-price">$198</div>
+                <div class="plan-period">per month</div>
+                <ul class="plan-features">
+                    <li>All Asian stocks (HK + SG)</li>
+                    <li>All US markets (Indices + Mag 7)</li>
+                    <li>TradingView indicator access</li>
+                    <li>Access to all 3 Telegram groups</li>
+                    <li>Save $66/month</li>
+                    <li>Best value - complete coverage</li>
+                </ul>
+                <div class="plan-button">Subscribe Now - Best Value</div>
+            </a>
+        </div>
 
-                <div class="form-group">
-                    <label for="telegram">Telegram Username *</label>
-                    <input type="text" id="telegram" name="telegram" required placeholder="@yourusername">
-                </div>
-            </div>
-
-            <button type="submit" class="subscribe-btn" id="submit-btn">Subscribe Now</button>
-            <div class="error-message" id="error-message"></div>
-        </form>
+        <div style="text-align: center; margin-top: 30px; color: #718096; font-size: 14px;">
+            <p>✓ Cancel anytime • ✓ Secure payment via Stripe • ✓ Instant access</p>
+        </div>
     </div>
-
-    <script src="https://js.stripe.com/v3/"></script>
-    <script>
-        // REPLACE THIS WITH YOUR STRIPE PUBLISHABLE KEY
-        const stripe = Stripe('pk_test_51SDKmPPApeZiCPK2N1DkLYgRTVIL5Jr2sqxrpJAFwFK9OuVCiur4Ayc0DwE4LL5WjD1GHwvtRG61E7Q7CKeotLij00XRaF6rnH');
-
-        // REPLACE THESE WITH YOUR STRIPE PRICE IDs
-        const PRICE_IDS = {
-            'HK': 'price_1SDi3pPApeZiCPK2SnT0U7jS',
-            'SG': 'price_1SDi7dPApeZiCPK21Ajpss86',
-            'INDICES_MAG7': 'price_1SDi9YPApeZiCPK2bxBhQ62N',
-            'ALL_MARKETS': 'price_1SDiAPPApeZiCPK2d8GSClAR'
-        };
-
-        // Calculate and update total price
-        function updateTotal() {
-            const checkboxes = document.querySelectorAll('input[name="market"]:checked');
-            let total = 0;
-
-            checkboxes.forEach(checkbox => {
-                total += parseInt(checkbox.dataset.price);
-                checkbox.closest('.market-option').classList.add('selected');
-            });
-
-            document.querySelectorAll('input[name="market"]:not(:checked)').forEach(checkbox => {
-                checkbox.closest('.market-option').classList.remove('selected');
-            });
-
-            document.getElementById('total-price').textContent = total;
-
-            // Enable/disable submit button
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = total === 0;
-        }
-
-        // Add event listeners to checkboxes
-        document.querySelectorAll('input[name="market"]').forEach(checkbox => {
-            checkbox.addEventListener('change', updateTotal);
-        });
-
-        // Handle form submission
-        document.getElementById('subscription-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const errorDiv = document.getElementById('error-message');
-            errorDiv.style.display = 'none';
-
-            // Get selected markets
-            const selectedMarkets = Array.from(document.querySelectorAll('input[name="market"]:checked'))
-                .map(cb => cb.value);
-
-            if (selectedMarkets.length === 0) {
-                errorDiv.textContent = 'Please select at least one market';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            // Get user details
-            const email = document.getElementById('email').value;
-            const tradingview = document.getElementById('tradingview').value;
-            const telegram = document.getElementById('telegram').value;
-
-            // Build line items for Stripe
-            const lineItems = selectedMarkets.map(market => ({
-                price: PRICE_IDS[market],
-                quantity: 1
-            }));
-
-            // Create Stripe Checkout Session
-            try {
-                const response = await fetch('YOUR_BACKEND_ENDPOINT/create-checkout-session', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        lineItems,
-                        email,
-                        metadata: {
-                            tradingview_username: tradingview,
-                            telegram_username: telegram,
-                            markets: selectedMarkets.join(',')
-                        }
-                    })
-                });
-
-                const session = await response.json();
-
-                // Redirect to Stripe Checkout
-                const result = await stripe.redirectToCheckout({
-                    sessionId: session.id
-                });
-
-                if (result.error) {
-                    errorDiv.textContent = result.error.message;
-                    errorDiv.style.display = 'block';
-                }
-            } catch (error) {
-                errorDiv.textContent = 'An error occurred. Please try again.';
-                errorDiv.style.display = 'block';
-                console.error('Error:', error);
-            }
-        });
-
-        // Initialize
-        updateTotal();
-    </script>
 </body>
 
 </html>
