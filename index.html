@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradingView Signals Subscription</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .market-selection {
+            margin-bottom: 30px;
+        }
+
+        .market-option {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .market-option:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .market-option.selected {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+
+        .market-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .market-info {
+            flex: 1;
+        }
+
+        .market-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .market-description {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .market-price {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .user-details {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .total-section {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .total-label {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .total-amount {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .total-period {
+            color: #718096;
+            font-size: 18px;
+        }
+
+        .subscribe-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .subscribe-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .subscribe-btn:active {
+            transform: translateY(0);
+        }
+
+        .subscribe-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .info-message {
+            background: #edf2f7;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📈 TradingView Signals</h1>
+        <p class="subtitle">Subscribe to premium market signals and indicators</p>
+
+        <div class="info-message">
+            ✨ Select the markets you want to track. You can choose one or multiple markets.
+        </div>
+
+        <form id="subscription-form">
+            <div class="market-selection">
+                <h3 style="margin-bottom: 16px; color: #2d3748;">Select Your Markets</h3>
+
+                <label class="market-option" data-market="hk">
+                    <input type="checkbox" name="market" value="HK" data-price="50">
+                    <div class="market-info">
+                        <div class="market-name">🇭🇰 Hong Kong Stocks</div>
+                        <div class="market-description">HSI, HSCEI & Hong Kong equities</div>
+                    </div>
+                    <div class="market-price">$50</div>
+                </label>
+
+                <label class="market-option" data-market="sg">
+                    <input type="checkbox" name="market" value="SG" data-price="50">
+                    <div class="market-info">
+                        <div class="market-name">🇸🇬 Singapore Stocks</div>
+                        <div class="market-description">STI & Singapore equities</div>
+                    </div>
+                    <div class="market-price">$50</div>
+                </label>
+
+                <label class="market-option" data-market="indices">
+                    <input type="checkbox" name="market" value="INDICES" data-price="40">
+                    <div class="market-info">
+                        <div class="market-name">📊 Global Indices</div>
+                        <div class="market-description">S&P 500, NASDAQ, DJI & more</div>
+                    </div>
+                    <div class="market-price">$40</div>
+                </label>
+
+                <label class="market-option" data-market="mag7">
+                    <input type="checkbox" name="market" value="MAG7" data-price="40">
+                    <div class="market-info">
+                        <div class="market-name">💎 Magnificent 7</div>
+                        <div class="market-description">AAPL, MSFT, GOOGL, AMZN, META, TSLA, NVDA</div>
+                    </div>
+                    <div class="market-price">$40</div>
+                </label>
+            </div>
+
+            <div class="total-section">
+                <div class="total-label">Monthly Subscription Total</div>
+                <div>
+                    <span class="total-amount">$<span id="total-price">0</span></span>
+                    <span class="total-period">/month</span>
+                </div>
+            </div>
+
+            <div class="user-details">
+                <h3 style="margin-bottom: 16px; color: #2d3748;">Your Details</h3>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required placeholder="your@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="tradingview">TradingView Username *</label>
+                    <input type="text" id="tradingview" name="tradingview" required
+                        placeholder="Your TradingView username">
+                </div>
+
+                <div class="form-group">
+                    <label for="telegram">Telegram Username *</label>
+                    <input type="text" id="telegram" name="telegram" required placeholder="@yourusername">
+                </div>
+            </div>
+
+            <button type="submit" class="subscribe-btn" id="submit-btn">Subscribe Now</button>
+            <div class="error-message" id="error-message"></div>
+        </form>
+    </div>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        // REPLACE THIS WITH YOUR STRIPE PUBLISHABLE KEY
+        const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY_HERE');
+
+        // REPLACE THESE WITH YOUR STRIPE PRICE IDs
+        const PRICE_IDS = {
+            'HK': 'price_HK_STOCKS_ID',
+            'SG': 'price_SG_STOCKS_ID',
+            'INDICES': 'price_INDICES_ID',
+            'MAG7': 'price_MAG7_ID'
+        };
+
+        // Calculate and update total price
+        function updateTotal() {
+            const checkboxes = document.querySelectorAll('input[name="market"]:checked');
+            let total = 0;
+
+            checkboxes.forEach(checkbox => {
+                total += parseInt(checkbox.dataset.price);
+                checkbox.closest('.market-option').classList.add('selected');
+            });
+
+            document.querySelectorAll('input[name="market"]:not(:checked)').forEach(checkbox => {
+                checkbox.closest('.market-option').classList.remove('selected');
+            });
+
+            document.getElementById('total-price').textContent = total;
+
+            // Enable/disable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = total === 0;
+        }
+
+        // Add event listeners to checkboxes
+        document.querySelectorAll('input[name="market"]').forEach(checkbox => {
+            checkbox.addEventListener('change', updateTotal);
+        });
+
+        // Handle form submission
+        document.getElementById('subscription-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.style.display = 'none';
+
+            // Get selected markets
+            const selectedMarkets = Array.from(document.querySelectorAll('input[name="market"]:checked'))
+                .map(cb => cb.value);
+
+            if (selectedMarkets.length === 0) {
+                errorDiv.textContent = 'Please select at least one market';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Get user details
+            const email = document.getElementById('email').value;
+            const tradingview = document.getElementById('tradingview').value;
+            const telegram = document.getElementById('telegram').value;
+
+            // Build line items for Stripe
+            const lineItems = selectedMarkets.map(market => ({
+                price: PRICE_IDS[market],
+                quantity: 1
+            }));
+
+            // Create Stripe Checkout Session
+            try {
+                const response = await fetch('YOUR_BACKEND_ENDPOINT/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        lineItems,
+                        email,
+                        metadata: {
+                            tradingview_username: tradingview,
+                            telegram_username: telegram,
+                            markets: selectedMarkets.join(',')
+                        }
+                    })
+                });
+
+                const session = await response.json();
+
+                // Redirect to Stripe Checkout
+                const result = await stripe.redirectToCheckout({
+                    sessionId: session.id
+                });
+
+                if (result.error) {
+                    errorDiv.textContent = result.error.message;
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+                console.error('Error:', error);
+            }
+        });
+
+        // Initialize
+        updateTotal();
+    </script>
+</body>
+
+</html>
