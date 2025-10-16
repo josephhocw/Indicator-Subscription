@@ -93,9 +93,12 @@ p {
     color: var(--primary-color);
 }
 
-.logo i {
-    margin-right: 0.5rem;
-    font-size: 1.75rem;
+.logo img {
+    height: 1.75rem; 
+    width: auto; 
+    margin-right: 0.5rem; 
+    vertical-align: middle; 
+    display: inline-block;
 }
 
 .nav-menu {
