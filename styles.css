@@ -88,13 +88,13 @@ p {
 .logo {
     display: flex;
     align-items: center;
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--primary-color);
 }
 
 .logo img {
-    height: 1.75rem; 
+    height: 2.5rem; 
     width: auto; 
     margin-right: 0.5rem; 
     vertical-align: middle; 
