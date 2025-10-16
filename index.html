@@ -4,312 +4,634 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TradingView Signals Subscription</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 700px;
-            width: 100%;
-            padding: 40px;
-        }
-
-        h1 {
-            color: #2d3748;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-
-        .subtitle {
-            color: #718096;
-            margin-bottom: 30px;
-            font-size: 16px;
-        }
-
-        .info-message {
-            background: #edf2f7;
-            border-left: 4px solid #667eea;
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 30px;
-            font-size: 14px;
-            color: #4a5568;
-        }
-
-        .plans-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .plan-card {
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 24px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .plan-card:hover {
-            border-color: #667eea;
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
-        }
-
-        .plan-card.featured {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-            position: relative;
-        }
-
-        .plan-card.featured::before {
-            content: "POPULAR";
-            position: absolute;
-            top: -12px;
-            right: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .plan-name {
-            font-size: 20px;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 8px;
-        }
-
-        .plan-description {
-            font-size: 14px;
-            color: #718096;
-            margin-bottom: 16px;
-            min-height: 40px;
-        }
-
-        .plan-price {
-            font-size: 36px;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 4px;
-        }
-
-        .plan-period {
-            font-size: 14px;
-            color: #718096;
-            margin-bottom: 16px;
-        }
-
-        .plan-features {
-            list-style: none;
-            margin-bottom: 20px;
-        }
-
-        .plan-features li {
-            padding: 6px 0;
-            font-size: 14px;
-            color: #4a5568;
-        }
-
-        .plan-features li::before {
-            content: "✓";
-            color: #48bb78;
-            font-weight: bold;
-            margin-right: 8px;
-        }
-
-        .plan-button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            text-align: center;
-        }
-
-        .plan-card:hover .plan-button {
-            transform: scale(1.02);
-        }
-
-        .section-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #2d3748;
-            margin: 40px 0 20px 0;
-            text-align: center;
-        }
-
-        .divider {
-            height: 1px;
-            background: #e2e8f0;
-            margin: 30px 0;
-        }
-
-        @media (max-width: 768px) {
-            .plans-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <title>Rho Market Navigator - Premium TradingView Signals & Market Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
 </head>
 
 <body>
-    <div class="container">
-        <h1>📈 TradingView Signals</h1>
-        <p class="subtitle">Subscribe to premium market signals and indicators</p>
-
-        <div class="info-message">
-            ✨ Choose your subscription plan. Each plan includes TradingView indicator access and exclusive Telegram
-            signal groups.
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-wrapper">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Rho Market Navigator</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#home" class="nav-link">Home</a></li>
+                    <li><a href="#about" class="nav-link">About</a></li>
+                    <li><a href="#features" class="nav-link">Features</a></li>
+                    <li><a href="#pricing" class="nav-link">Pricing</a></li>
+                    <li><a href="#faq" class="nav-link">FAQ</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+                <button class="mobile-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
         </div>
+    </nav>
 
-        <!-- Single Market Plans -->
-        <div class="plans-grid">
-            <a href="https://buy.stripe.com/test_7sYbJ38SUdxF1fL1pu4ow02" class="plan-card">
-                <div class="plan-name">🇭🇰 Hong Kong Stocks</div>
-                <div class="plan-description">HSI, HSCEI & Hong Kong equities</div>
-                <div class="plan-price">$88</div>
-                <div class="plan-period">per month</div>
-                <ul class="plan-features">
-                    <li>Hong Kong stocks signals</li>
-                    <li>TradingView indicator access</li>
-                    <li>Telegram group access</li>
-                </ul>
-                <div class="plan-button">Subscribe Now</div>
-            </a>
-
-            <a href="https://buy.stripe.com/test_8x24gB6KM65de2x9W04ow06" class="plan-card">
-                <div class="plan-name">🇸🇬 Singapore Stocks</div>
-                <div class="plan-description">STI & Singapore equities</div>
-                <div class="plan-price">$88</div>
-                <div class="plan-period">per month</div>
-                <ul class="plan-features">
-                    <li>Singapore stocks signals</li>
-                    <li>TradingView indicator access</li>
-                    <li>Telegram group access</li>
-                </ul>
-                <div class="plan-button">Subscribe Now</div>
-            </a>
-
-            <a href="https://buy.stripe.com/test_5kQ00lb123X5f6Bb044ow05" class="plan-card">
-                <div class="plan-name">📊💎 Indices + Mag 7</div>
-                <div class="plan-description">S&P 500, NASDAQ, DJI & Magnificent 7</div>
-                <div class="plan-price">$88</div>
-                <div class="plan-period">per month</div>
-                <ul class="plan-features">
-                    <li>Global indices signals</li>
-                    <li>Magnificent 7 stocks</li>
-                    <li>TradingView indicator access</li>
-                    <li>Live Telegram Notifications</li>
-                </ul>
-                <div class="plan-button">Subscribe Now</div>
-            </a>
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-bg">
+            <div class="circle-animation"></div>
+            <div class="radar-animation"></div>
         </div>
-
-        <div class="divider"></div>
-        <div class="section-title">💼 Combo Plans - Save More</div>
-
-        <!-- Combo Plans -->
-        <div class="plans-grid">
-            <a href="https://buy.stripe.com/test_bJecN74CE65d5w17NS4ow07" class="plan-card">
-                <div class="plan-name">🇭🇰🇸🇬 Asian Stocks Bundle</div>
-                <div class="plan-description">Hong Kong + Singapore stocks</div>
-                <div class="plan-price">$158</div>
-                <div class="plan-period">per month</div>
-                <ul class="plan-features">
-                    <li>HK & SG stocks signals</li>
-                    <li>TradingView indicator access</li>
-                    <li>Live Telegram Notifications</li>
-                    <li>Save $18/month</li>
-                </ul>
-                <div class="plan-button">Subscribe Now</div>
-            </a>
-
-            <a href="https://buy.stripe.com/test_5kQbJ31qseBJ6A5ecg4ow09" class="plan-card">
-                <div class="plan-name">🇭🇰📊💎 HK + US Markets</div>
-                <div class="plan-description">Hong Kong + Indices + Magnificent 7</div>
-                <div class="plan-price">$158</div>
-                <div class="plan-period">per month</div>
-                <ul class="plan-features">
-                    <li>HK stocks + US markets</li>
-                    <li>Global indices & Mag 7</li>
-                    <li>TradingView indicator access</li>
-                    <li>Live Telegram Notifications</li>
-                    <li>Save $18/month</li>
-                </ul>
-                <div class="plan-button">Subscribe Now</div>
-            </a>
-
-            <a href="https://buy.stripe.com/test_3cI9AV2uw3X53nT9W04ow08" class="plan-card">
-                <div class="plan-name">🇸🇬📊💎 SG + US Markets</div>
-                <div class="plan-description">Singapore + Indices + Magnificent 7</div>
-                <div class="plan-price">$158</div>
-                <div class="plan-period">per month</div>
-                <ul class="plan-features">
-                    <li>SG stocks + US markets</li>
-                    <li>Global indices & Mag 7</li>
-                    <li>TradingView indicator access</li>
-                    <li>Live Telegram Notifications</li>
-                    <li>Save $18/month</li>
-                </ul>
-                <div class="plan-button">Subscribe Now</div>
-            </a>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text" data-aos="fade-up">
+                    <span class="hero-badge">Professional Trading Signals</span>
+                    <h1 class="hero-title">Master Asian & US Markets with <span class="gradient-text">Premium
+                            Signals</span></h1>
+                    <p class="hero-description">
+                        Get real-time TradingView indicators and exclusive Telegram signals for Hong Kong, Singapore,
+                        and US markets. Join over 1,000+ traders making informed decisions.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#pricing" class="btn btn-primary">
+                            <i class="fas fa-rocket"></i> Get Started Now
+                        </a>
+                        <a href="#features" class="btn btn-secondary">
+                            <i class="fas fa-play-circle"></i> Learn More
+                        </a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <i class="fas fa-users"></i>
+                            <span>1,000+ Active Traders</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-signal"></i>
+                            <span>95% Signal Accuracy</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-globe"></i>
+                            <span>3 Markets Covered</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-image" data-aos="fade-left">
+                    <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800"
+                        alt="Trading Dashboard">
+                </div>
+            </div>
         </div>
+    </section>
 
-        <div class="divider"></div>
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-badge">About Us</span>
+                <h2>Master the Markets with <span class="gradient-text">Rho Market Navigator</span></h2>
+                <p>Your gateway to professional trading signals across Asian and US markets</p>
+            </div>
 
-        <!-- All Markets Plan -->
-        <div class="plans-grid" style="grid-template-columns: 1fr;">
-            <a href="https://buy.stripe.com/test_28EbJ3c56ctB5w10lq4ow04" class="plan-card featured">
-                <div class="plan-name">🌍 All Markets - Complete Access</div>
-                <div class="plan-description">Hong Kong + Singapore + Indices + Magnificent 7</div>
-                <div class="plan-price">$198</div>
-                <div class="plan-period">per month</div>
-                <ul class="plan-features">
-                    <li>All Asian stocks (HK + SG)</li>
-                    <li>All US markets (Indices + Mag 7)</li>
-                    <li>TradingView indicator access</li>
-                    <li>Access to all 3 Telegram groups</li>
-                    <li>Save $66/month</li>
-                    <li>Best value - complete coverage</li>
-                </ul>
-                <div class="plan-button">Subscribe Now - Best Value</div>
-            </a>
+            <div class="about-grid">
+                <div class="about-image" data-aos="fade-right">
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800" alt="Trading Analysis">
+                    <div class="about-experience">
+                        <h3>5+</h3>
+                        <p>Years of Market Experience</p>
+                    </div>
+                </div>
+                <div class="about-content" data-aos="fade-left">
+                    <h3>Professional Trading Signals Platform</h3>
+                    <p>
+                        Rho Market Navigator is your comprehensive trading companion, providing professional-grade
+                        signals
+                        and analysis for Hong Kong, Singapore, and US markets. Our platform combines advanced
+                        TradingView
+                        indicators with real-time Telegram notifications to keep you ahead of market movements.
+                    </p>
+                    <div class="about-features">
+                        <div class="feature-item">
+                            <i class="fas fa-chart-bar"></i>
+                            <div>
+                                <h4>Real-Time Analysis</h4>
+                                <p>Get instant market insights and signals from our proprietary TradingView indicators
+                                </p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-bell"></i>
+                            <div>
+                                <h4>Instant Notifications</h4>
+                                <p>Receive timely signals via exclusive Telegram groups for immediate action</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-graduation-cap"></i>
+                            <div>
+                                <h4>Expert Guidance</h4>
+                                <p>Learn from experienced traders and improve your trading strategies</p>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#pricing" class="btn btn-primary">Start Trading Smarter</a>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <div style="text-align: center; margin-top: 30px; color: #718096; font-size: 14px;">
-            <p>✓ Cancel anytime • ✓ Secure payment via Stripe • ✓ Instant access</p>
+    <!-- How It Works -->
+    <section id="features" class="how-it-works">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-badge">How It Works</span>
+                <h2>Start Trading in <span class="gradient-text">3 Simple Steps</span></h2>
+                <p>Join thousands of successful traders in minutes</p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="step-icon">
+                        <i class="fas fa-user-plus"></i>
+                        <span class="step-number">01</span>
+                    </div>
+                    <h3>Choose Your Plan</h3>
+                    <p>Select the market coverage that suits your trading needs - single market, combo, or all markets
+                    </p>
+                </div>
+
+                <div class="step-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="step-icon">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="step-number">02</span>
+                    </div>
+                    <h3>Access TradingView Indicators</h3>
+                    <p>Get instant access to our proprietary indicators and start analyzing markets like a pro</p>
+                </div>
+
+                <div class="step-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="step-icon">
+                        <i class="fas fa-telegram"></i>
+                        <span class="step-number">03</span>
+                    </div>
+                    <h3>Join Telegram Groups</h3>
+                    <p>Receive real-time signals and connect with our trading community for maximum profits</p>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="statistics">
+        <div class="container">
+            <div class="stats-grid" data-aos="fade-up">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3 class="stat-number" data-target="5">0</h3>
+                    <p>Industry Awards</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    <h3 class="stat-number" data-target="450">0</h3>
+                    <p>Pips Monthly Target</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <h3 class="stat-number" data-target="95">0</h3>
+                    <p>Success Rate</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3 class="stat-number">24/7</h3>
+                    <p>Support Available</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-badge">Features</span>
+                <h2>Why Choose <span class="gradient-text">Rho Market Navigator</span></h2>
+                <p>Everything you need to succeed in trading</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-area"></i>
+                    </div>
+                    <h3>Multi-Market Coverage</h3>
+                    <p>Access signals for Hong Kong, Singapore, and US markets including indices and Magnificent 7
+                        stocks</p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Real-Time Signals</h3>
+                    <p>Get instant notifications when trading opportunities arise, never miss a profitable trade</p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Risk Management</h3>
+                    <p>Every signal includes stop-loss and take-profit levels to protect your capital</p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Mobile Access</h3>
+                    <p>Trade on the go with Telegram notifications and TradingView mobile app integration</p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Trading Community</h3>
+                    <p>Join exclusive groups to discuss strategies and learn from experienced traders</p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>Educational Resources</h3>
+                    <p>Access tutorials and guides to improve your trading skills and market understanding</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-badge">Pricing Plans</span>
+                <h2>Choose Your <span class="gradient-text">Trading Journey</span></h2>
+                <p>Flexible plans designed for traders at every level</p>
+            </div>
+
+            <!-- Plan Tabs -->
+            <div class="plan-tabs" data-aos="fade-up">
+                <button class="tab-btn active" data-category="single">Single Markets</button>
+                <button class="tab-btn" data-category="combo">Combo Plans</button>
+                <button class="tab-btn" data-category="all">All Markets</button>
+            </div>
+
+            <!-- Single Market Plans -->
+            <div class="pricing-grid plan-category active" id="single-plans">
+                <div class="pricing-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="plan-header">
+                        <h3>🇭🇰 Hong Kong</h3>
+                        <p>HSI, HSCEI & HK Equities</p>
+                    </div>
+                    <div class="plan-price">
+                        <span class="currency">$</span>
+                        <span class="amount">88</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> Hong Kong stocks signals</li>
+                        <li><i class="fas fa-check"></i> TradingView indicators</li>
+                        <li><i class="fas fa-check"></i> Exclusive Telegram group</li>
+                        <li><i class="fas fa-check"></i> Daily market analysis</li>
+                        <li><i class="fas fa-check"></i> Risk management guidance</li>
+                    </ul>
+                    <a href="https://buy.stripe.com/test_7sYbJ38SUdxF1fL1pu4ow02"
+                        class="btn btn-primary btn-block">Subscribe Now</a>
+                </div>
+
+                <div class="pricing-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="plan-header">
+                        <h3>🇸🇬 Singapore</h3>
+                        <p>STI & SG Equities</p>
+                    </div>
+                    <div class="plan-price">
+                        <span class="currency">$</span>
+                        <span class="amount">88</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> Singapore stocks signals</li>
+                        <li><i class="fas fa-check"></i> TradingView indicators</li>
+                        <li><i class="fas fa-check"></i> Exclusive Telegram group</li>
+                        <li><i class="fas fa-check"></i> Daily market analysis</li>
+                        <li><i class="fas fa-check"></i> Risk management guidance</li>
+                    </ul>
+                    <a href="https://buy.stripe.com/test_8x24gB6KM65de2x9W04ow06"
+                        class="btn btn-primary btn-block">Subscribe Now</a>
+                </div>
+
+                <div class="pricing-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="plan-header">
+                        <h3>📊💎 US Markets</h3>
+                        <p>Indices & Magnificent 7</p>
+                    </div>
+                    <div class="plan-price">
+                        <span class="currency">$</span>
+                        <span class="amount">88</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> S&P 500, NASDAQ, DJI</li>
+                        <li><i class="fas fa-check"></i> Magnificent 7 stocks</li>
+                        <li><i class="fas fa-check"></i> TradingView indicators</li>
+                        <li><i class="fas fa-check"></i> Exclusive Telegram group</li>
+                        <li><i class="fas fa-check"></i> Pre-market analysis</li>
+                    </ul>
+                    <a href="https://buy.stripe.com/test_5kQ00lb123X5f6Bb044ow05"
+                        class="btn btn-primary btn-block">Subscribe Now</a>
+                </div>
+            </div>
+
+            <!-- Combo Plans -->
+            <div class="pricing-grid plan-category" id="combo-plans">
+                <div class="pricing-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="plan-header">
+                        <h3>🇭🇰🇸🇬 Asian Bundle</h3>
+                        <p>Hong Kong + Singapore</p>
+                    </div>
+                    <div class="plan-price">
+                        <span class="currency">$</span>
+                        <span class="amount">158</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <div class="plan-badge">Save $18/month</div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> All HK & SG signals</li>
+                        <li><i class="fas fa-check"></i> 2 Telegram groups</li>
+                        <li><i class="fas fa-check"></i> TradingView indicators</li>
+                        <li><i class="fas fa-check"></i> Cross-market analysis</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                    </ul>
+                    <a href="https://buy.stripe.com/test_bJecN74CE65d5w17NS4ow07"
+                        class="btn btn-primary btn-block">Subscribe Now</a>
+                </div>
+
+                <div class="pricing-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="plan-header">
+                        <h3>🇭🇰📊 HK + US</h3>
+                        <p>Hong Kong + US Markets</p>
+                    </div>
+                    <div class="plan-price">
+                        <span class="currency">$</span>
+                        <span class="amount">158</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <div class="plan-badge">Save $18/month</div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> HK stocks + US indices</li>
+                        <li><i class="fas fa-check"></i> Magnificent 7 coverage</li>
+                        <li><i class="fas fa-check"></i> 2 Telegram groups</li>
+                        <li><i class="fas fa-check"></i> 24-hour market coverage</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                    </ul>
+                    <a href="https://buy.stripe.com/test_5kQbJ31qseBJ6A5ecg4ow09"
+                        class="btn btn-primary btn-block">Subscribe Now</a>
+                </div>
+
+                <div class="pricing-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="plan-header">
+                        <h3>🇸🇬📊 SG + US</h3>
+                        <p>Singapore + US Markets</p>
+                    </div>
+                    <div class="plan-price">
+                        <span class="currency">$</span>
+                        <span class="amount">158</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <div class="plan-badge">Save $18/month</div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> SG stocks + US indices</li>
+                        <li><i class="fas fa-check"></i> Magnificent 7 coverage</li>
+                        <li><i class="fas fa-check"></i> 2 Telegram groups</li>
+                        <li><i class="fas fa-check"></i> 24-hour market coverage</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                    </ul>
+                    <a href="https://buy.stripe.com/test_3cI9AV2uw3X53nT9W04ow08"
+                        class="btn btn-primary btn-block">Subscribe Now</a>
+                </div>
+            </div>
+
+            <!-- All Markets Plan -->
+            <div class="pricing-grid plan-category" id="all-plans">
+                <div class="pricing-card featured" data-aos="fade-up">
+                    <div class="featured-badge">Most Popular</div>
+                    <div class="plan-header">
+                        <h3>🌍 Complete Access</h3>
+                        <p>All Markets Coverage</p>
+                    </div>
+                    <div class="plan-price">
+                        <span class="currency">$</span>
+                        <span class="amount">198</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <div class="plan-badge">Save $66/month</div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> All Asian stocks (HK + SG)</li>
+                        <li><i class="fas fa-check"></i> All US markets coverage</li>
+                        <li><i class="fas fa-check"></i> Access to all 3 groups</li>
+                        <li><i class="fas fa-check"></i> Premium TradingView suite</li>
+                        <li><i class="fas fa-check"></i> Priority VIP support</li>
+                        <li><i class="fas fa-check"></i> Exclusive masterclasses</li>
+                        <li><i class="fas fa-check"></i> Personal onboarding</li>
+                    </ul>
+                    <a href="https://buy.stripe.com/test_28EbJ3c56ctB5w10lq4ow04"
+                        class="btn btn-primary btn-block btn-featured">Get Complete Access</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-badge">FAQ</span>
+                <h2>Frequently Asked <span class="gradient-text">Questions</span></h2>
+                <p>Everything you need to know about our trading signals service</p>
+            </div>
+
+            <div class="faq-grid">
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
+                    <button class="faq-question">
+                        <span>How do I get started with your signals?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Getting started is simple! Choose your preferred subscription plan, complete the payment via
+                            Stripe,
+                            and you'll receive immediate access to our TradingView indicators and an invitation to join
+                            our exclusive
+                            Telegram groups. Make sure to have your Telegram username ready during signup.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+                    <button class="faq-question">
+                        <span>What markets do you cover?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We provide comprehensive coverage of Hong Kong stocks (HSI, HSCEI), Singapore stocks (STI),
+                            US indices (S&P 500, NASDAQ, Dow Jones), and the Magnificent 7 tech stocks. You can choose
+                            single market plans or combine them for better value.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
+                    <button class="faq-question">
+                        <span>How accurate are your trading signals?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Our signals maintain a 95% accuracy rate based on historical performance. Each signal
+                            includes
+                            clear entry points, stop-loss levels, and take-profit targets. However, remember that past
+                            performance doesn't guarantee future results, and all trading involves risk.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
+                    <button class="faq-question">
+                        <span>Can I cancel my subscription anytime?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes! You can cancel your subscription at any time through your Stripe dashboard. There are no
+                            long-term contracts or cancellation fees. Your access will continue until the end of your
+                            current
+                            billing period.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="500">
+                    <button class="faq-question">
+                        <span>Do I need prior trading experience?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>While prior experience is helpful, it's not required. Our signals are designed to be clear
+                            and
+                            actionable for traders at all levels. We provide educational resources and our community is
+                            always
+                            ready to help newcomers learn the ropes.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="600">
+                    <button class="faq-question">
+                        <span>How do I access the TradingView indicators?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>After subscribing, you'll receive detailed instructions on how to add our proprietary
+                            indicators
+                            to your TradingView charts. The indicators work on both free and paid TradingView accounts
+                            and can
+                            be accessed on desktop and mobile devices.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content" data-aos="zoom-in">
+                <h2>Ready to Start Your Trading Journey?</h2>
+                <p>Join thousands of successful traders and transform your trading today</p>
+                <div class="cta-buttons">
+                    <a href="#pricing" class="btn btn-light">View Plans</a>
+                    <a href="#contact" class="btn btn-outline">Contact Support</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Rho Market Navigator</span>
+                    </div>
+                    <p>Your trusted partner in navigating Asian and US financial markets with professional-grade
+                        signals.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Markets</h4>
+                    <ul>
+                        <li><a href="#">Hong Kong Stocks</a></li>
+                        <li><a href="#">Singapore Stocks</a></li>
+                        <li><a href="#">US Indices</a></li>
+                        <li><a href="#">Magnificent 7</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><i class="fas fa-telegram"></i> @Joseph_Ho</li>
+                        <li><i class="fas fa-envelope"></i> support@rhonavigator.com</li>
+                        <li><i class="fas fa-clock"></i> 24/7 Support</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 Rho Market Navigator. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Risk Disclosure</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>
