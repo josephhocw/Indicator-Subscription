@@ -511,9 +511,9 @@ p {
     gap: 2rem;
 }
 
-/* Single market plans - 2x2 grid */
+/* Single market plans - 4 columns */
 #single-plans {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     max-width: 900px;
     margin: 0 auto;
 }
