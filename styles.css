@@ -156,7 +156,7 @@ p {
     display: flex;
     align-items: center;
     background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
-    padding: 120px 0 80px;
+    padding: 120px 0 60px;
     overflow: hidden;
 }
 
