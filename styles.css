@@ -514,7 +514,6 @@ p {
 /* Single market plans - 4 columns */
 #single-plans {
     grid-template-columns: repeat(4, 1fr);
-    max-width: 900px;
     margin: 0 auto;
 }
 
