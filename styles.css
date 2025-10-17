@@ -526,7 +526,7 @@ p {
 /* All markets plan - centered single card */
 #all-plans {
     grid-template-columns: 1fr;
-    max-width: 450px;
+    max-width: 900px;
     margin: 0 auto;
 }
 
