@@ -571,8 +571,26 @@ p {
 }
 
 .pricing-grid {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 2rem;
+}
+
+/* Single market plans - 2x2 grid */
+#single-plans {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Combo plans - 3 columns */
+#combo-plans {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+/* All markets plan - centered single card */
+#all-plans {
+    grid-template-columns: 1fr;
+    max-width: 450px;
+    margin: 0 auto;
 }
 
 .pricing-card {
@@ -980,4 +998,4 @@ p {
     .cta-buttons {
         flex-direction: column;
     }
-}   
+}
