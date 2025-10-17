@@ -20,7 +20,7 @@ if (mobileToggle) {
     });
 }
 
-// Mobile menu styles (add to existing nav styles)
+// Mobile menu styles
 const mobileStyles = `
     @media (max-width: 768px) {
         .nav-menu {
@@ -33,6 +33,7 @@ const mobileStyles = `
             flex-direction: column;
             padding: 2rem;
             transition: right 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
         .nav-menu.active {
@@ -53,7 +54,6 @@ const mobileStyles = `
     }
 `;
 
-// Add mobile styles to head
 const styleSheet = document.createElement("style");
 styleSheet.textContent = mobileStyles;
 document.head.appendChild(styleSheet);
@@ -124,38 +124,6 @@ window.addEventListener('scroll', () => {
             link.classList.add('active');
         }
     });
-});
-
-// ===========================
-// Number Counter Animation
-// ===========================
-const counters = document.querySelectorAll('.stat-number[data-target]');
-let counterObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            const counter = entry.target;
-            const target = parseInt(counter.getAttribute('data-target'));
-            const increment = target / 100;
-            let currentValue = 0;
-
-            const updateCounter = () => {
-                if (currentValue < target) {
-                    currentValue += increment;
-                    counter.textContent = Math.ceil(currentValue);
-                    setTimeout(updateCounter, 20);
-                } else {
-                    counter.textContent = target;
-                }
-            };
-
-            updateCounter();
-            counterObserver.unobserve(counter);
-        }
-    });
-}, { threshold: 0.5 });
-
-counters.forEach(counter => {
-    counterObserver.observe(counter);
 });
 
 // ===========================
@@ -232,29 +200,6 @@ scrollTopBtn.addEventListener('click', () => {
 });
 
 // ===========================
-// Form Validation (if contact form added)
-// ===========================
-const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-};
-
-// ===========================
-// Loading Screen
-// ===========================
-window.addEventListener('load', () => {
-    const loader = document.querySelector('.loading');
-    if (loader) {
-        setTimeout(() => {
-            loader.style.opacity = '0';
-            setTimeout(() => {
-                loader.style.display = 'none';
-            }, 300);
-        }, 500);
-    }
-});
-
-// ===========================
 // Parallax Effect for Hero
 // ===========================
 window.addEventListener('scroll', () => {
@@ -266,100 +211,6 @@ window.addEventListener('scroll', () => {
         element.style.transform = `translateY(${scrolled * speed}px)`;
     });
 });
-
-// ===========================
-// Typewriter Effect (optional)
-// ===========================
-class TypeWriter {
-    constructor(element, words, wait = 3000) {
-        this.element = element;
-        this.words = words;
-        this.wait = parseInt(wait, 10);
-        this.wordIndex = 0;
-        this.txt = '';
-        this.isDeleting = false;
-        this.type();
-    }
-
-    type() {
-        const current = this.wordIndex % this.words.length;
-        const fullTxt = this.words[current];
-
-        if (this.isDeleting) {
-            this.txt = fullTxt.substring(0, this.txt.length - 1);
-        } else {
-            this.txt = fullTxt.substring(0, this.txt.length + 1);
-        }
-
-        this.element.innerHTML = `<span class="txt">${this.txt}</span>`;
-
-        let typeSpeed = 100;
-
-        if (this.isDeleting) {
-            typeSpeed /= 2;
-        }
-
-        if (!this.isDeleting && this.txt === fullTxt) {
-            typeSpeed = this.wait;
-            this.isDeleting = true;
-        } else if (this.isDeleting && this.txt === '') {
-            this.isDeleting = false;
-            this.wordIndex++;
-            typeSpeed = 500;
-        }
-
-        setTimeout(() => this.type(), typeSpeed);
-    }
-}
-
-// Initialize typewriter if element exists
-const typewriterElement = document.querySelector('.typewriter');
-if (typewriterElement) {
-    const words = ['Hong Kong Markets', 'Singapore Markets', 'US Indices', 'Magnificent 7'];
-    new TypeWriter(typewriterElement, words);
-}
-
-// ===========================
-// Notification Toast (for actions)
-// ===========================
-function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-
-    // Toast styles
-    toast.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#48bb78' : '#f56565'};
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        z-index: 10000;
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.3s ease;
-    `;
-
-    document.body.appendChild(toast);
-
-    // Animate in
-    setTimeout(() => {
-        toast.style.opacity = '1';
-        toast.style.transform = 'translateY(0)';
-    }, 100);
-
-    // Remove after 3 seconds
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-            document.body.removeChild(toast);
-        }, 300);
-    }, 3000);
-}
 
 // ===========================
 // Pricing Card Hover Effects
@@ -378,54 +229,12 @@ pricingCards.forEach(card => {
 });
 
 // ===========================
-// Lazy Loading Images
-// ===========================
-const images = document.querySelectorAll('img[data-src]');
-const imageOptions = {
-    threshold: 0,
-    rootMargin: '0px 0px 50px 0px'
-};
-
-const imageObserver = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            const img = entry.target;
-            img.src = img.dataset.src;
-            img.classList.add('loaded');
-            observer.unobserve(img);
-        }
-    });
-}, imageOptions);
-
-images.forEach(img => imageObserver.observe(img));
-
-// ===========================
-// Copy to Clipboard (for Telegram username)
-// ===========================
-function copyToClipboard(text) {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
-    showToast('Copied to clipboard!');
-}
-
-// ===========================
 // Initialize Everything on DOM Ready
 // ===========================
 document.addEventListener('DOMContentLoaded', () => {
-    // Add loading screen
-    const loadingDiv = document.createElement('div');
-    loadingDiv.className = 'loading';
-    loadingDiv.innerHTML = '<div class="spinner"></div>';
-    document.body.prepend(loadingDiv);
+    console.log('RHO Market Navigator website loaded successfully!');
 
-    // Initialize all components
-    console.log('Rho Market Navigator website loaded successfully!');
-
-    // Track page views (you can replace with your analytics)
+    // Track page views (replace with your analytics if needed)
     if (typeof gtag !== 'undefined') {
         gtag('event', 'page_view', {
             page_title: document.title,
@@ -451,9 +260,9 @@ function debounce(func, wait) {
     };
 }
 
-// Apply debounce to scroll events
+// Apply debounce to scroll events for better performance
 const debouncedScroll = debounce(() => {
-    // Your scroll logic here
+    // Additional scroll logic can be added here if needed
 }, 100);
 
 window.addEventListener('scroll', debouncedScroll, { passive: true });
