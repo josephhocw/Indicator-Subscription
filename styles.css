@@ -536,6 +536,9 @@ p {
     box-shadow: var(--shadow-lg);
     transition: var(--transition);
     position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .pricing-card:hover {
@@ -580,6 +583,7 @@ p {
 .plan-header p {
     color: var(--text-light);
     font-size: 0.875rem;
+    min-height: 2.5em;
 }
 
 .plan-price {
@@ -607,6 +611,7 @@ p {
 .plan-features {
     list-style: none;
     margin-bottom: 2rem;
+    flex-grow: 1;
 }
 
 .plan-features li {
