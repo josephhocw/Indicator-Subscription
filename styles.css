@@ -582,6 +582,8 @@ p {
 .plan-header h3 {
     color: var(--dark-color);
     margin-bottom: 0.5rem;
+    min-height: 2.1em;
+    line-height: 1.05;
 }
 
 .plan-header p {
