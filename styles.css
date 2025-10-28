@@ -575,6 +575,10 @@ p {
     margin-bottom: 1rem;
 }
 
+.plan-header {
+    min-height: 85px;
+}
+
 .plan-header h3 {
     color: var(--dark-color);
     margin-bottom: 0.5rem;
