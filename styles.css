@@ -566,15 +566,17 @@ p {
 }
 
 .plan-badge {
-    display: inline-block;
     background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
     color: white;
-    padding: 0.25rem 0.75rem;
+    padding: 0.5rem 1.25rem;
     border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 700;
     margin-bottom: 1rem;
-    min-height: 24px;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .plan-header {
