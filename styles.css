@@ -538,6 +538,8 @@ p {
     box-shadow: var(--shadow-lg);
     transition: var(--transition);
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .pricing-card:hover {
@@ -572,22 +574,36 @@ p {
     font-size: 0.75rem;
     font-weight: 600;
     margin-bottom: 1rem;
+    min-height: 24px;
+}
+
+.plan-header {
+    min-height: 85px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .plan-header h3 {
     color: var(--dark-color);
     margin-bottom: 0.5rem;
+    min-height: 36px;
 }
 
 .plan-header p {
     color: var(--text-light);
     font-size: 0.875rem;
+    margin: 0;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
 }
 
 .plan-price {
     display: flex;
     align-items: baseline;
     margin: 1.5rem 0;
+    min-height: 60px;
 }
 
 .currency {
@@ -609,18 +625,22 @@ p {
 .plan-features {
     list-style: none;
     margin-bottom: 2rem;
+    flex-grow: 1;
 }
 
 .plan-features li {
     padding: 0.75rem 0;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.75rem;
     border-bottom: 1px solid #f0f0f0;
+    min-height: 50px;
 }
 
 .plan-features i {
     color: #48bb78;
+    margin-top: 0.25rem;
+    flex-shrink: 0;
 }
 
 .btn-featured {
