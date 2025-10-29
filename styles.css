@@ -517,9 +517,11 @@ p {
     margin: 0 auto;
 }
 
-/* Combo plans - 3 columns */
+/* Combo plans - 2 columns centered */
 #combo-plans {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 /* All markets plan - centered single card */
