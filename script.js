@@ -334,13 +334,8 @@ if (proceedBtn) {
 if (viewFullTermsLink) {
     viewFullTermsLink.addEventListener('click', (e) => {
         e.preventDefault();
-        // Scroll to FAQ section which has terms information
-        const faqSection = document.getElementById('faq');
-        if (faqSection) {
-            disclaimerModal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            faqSection.scrollIntoView({ behavior: 'smooth' });
-        }
+        // Open full terms page in new tab
+        window.open('terms.html', '_blank');
     });
 }
 
