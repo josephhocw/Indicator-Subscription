@@ -573,6 +573,44 @@
         </div>
     </footer>
 
+    <!-- Disclaimer Modal - ADD THIS ENTIRE SECTION HERE -->
+    <div id="disclaimerModal" class="modal">
+        <div class="modal-content">
+            <h2>Terms & Risk Disclaimer</h2>
+            <div class="modal-body">
+                <p><strong>Please read and acknowledge before proceeding:</strong></p>
+                <ul style="text-align: left; max-height: 300px; overflow-y: auto;">
+                    <li><strong>Not Financial Advice</strong> - All content is for educational purposes only</li>
+                    <li><strong>No Guarantee of Profits</strong> - Past performance doesn't indicate future results</li>
+                    <li><strong>Risk of Loss</strong> - Trading carries substantial risk and may result in loss of
+                        capital</li>
+                    <li><strong>Key Person Risk</strong> - Webinars conducted by single expert; may be
+                        postponed/cancelled if unavailable</li>
+                    <li><strong>No Refund Policy</strong> - All subscriptions are non-refundable (3-month commitment)
+                    </li>
+                    <li><strong>Your Responsibility</strong> - You are solely responsible for your trading decisions
+                    </li>
+                </ul>
+                <a href="#" id="viewFullTerms" style="color: var(--primary-color); text-decoration: underline;">View
+                    Full Terms & Disclaimer</a>
+            </div>
+
+            <div class="checkbox-container">
+                <label>
+                    <input type="checkbox" id="agreeCheckbox">
+                    <span>I acknowledge that I have read, understood, and agree to the Terms of Service and Risk
+                        Disclaimer, and accept all associated risks of trading.</span>
+                </label>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="proceedBtn" disabled>Proceed to Payment</button>
+            </div>
+        </div>
+    </div>
+    <!-- END Disclaimer Modal -->
+
     <!-- Scripts -->
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
     <script src="script.js"></script>
