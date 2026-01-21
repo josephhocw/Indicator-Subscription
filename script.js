@@ -234,6 +234,24 @@ pricingCards.forEach(card => {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('RHO Market Navigator website loaded successfully!');
 
+    // ===========================
+    // IMPORTANT: Protect External Links
+    // ===========================
+    // Ensure external links (like Stripe billing portal) always work without interference
+    document.querySelectorAll('a[href^="http"]').forEach(link => {
+        // Skip if it's an internal anchor link
+        if (link.getAttribute('href').startsWith('#')) return;
+
+        // Mark as external and ensure it works properly
+        link.addEventListener('click', (e) => {
+            // Allow the link to work normally, close mobile menu if open
+            if (navMenu && navMenu.classList.contains('active')) {
+                navMenu.classList.remove('active');
+                if (mobileToggle) mobileToggle.classList.remove('active');
+            }
+        });
+    });
+
     // Track page views (replace with your analytics if needed)
     if (typeof gtag !== 'undefined') {
         gtag('event', 'page_view', {
@@ -266,100 +284,3 @@ const debouncedScroll = debounce(() => {
 }, 100);
 
 window.addEventListener('scroll', debouncedScroll, { passive: true });
-
-// ===========================
-// Disclaimer Modal for Stripe Payments
-// ===========================
-const disclaimerModal = document.getElementById('disclaimerModal');
-const agreeCheckbox = document.getElementById('agreeCheckbox');
-const proceedBtn = document.getElementById('proceedBtn');
-const cancelBtn = document.getElementById('cancelBtn');
-const viewFullTermsLink = document.getElementById('viewFullTerms');
-let currentStripeLink = '';
-
-// Wait for DOM to be ready, then intercept all Subscribe buttons
-function initDisclaimerModal() {
-    const subscribeButtons = document.querySelectorAll('a[href*="stripe.com"]');
-
-    subscribeButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-            currentStripeLink = button.getAttribute('href');
-            disclaimerModal.style.display = 'block';
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-
-            // Reset checkbox and button state
-            agreeCheckbox.checked = false;
-            proceedBtn.disabled = true;
-        });
-    });
-
-    console.log(`✅ Disclaimer modal initialized for ${subscribeButtons.length} subscription buttons`);
-}
-
-// Enable/disable proceed button based on checkbox
-if (agreeCheckbox) {
-    agreeCheckbox.addEventListener('change', () => {
-        proceedBtn.disabled = !agreeCheckbox.checked;
-    });
-}
-
-// Cancel button - close modal
-if (cancelBtn) {
-    cancelBtn.addEventListener('click', () => {
-        disclaimerModal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // Restore scrolling
-        currentStripeLink = '';
-    });
-}
-
-// Proceed to Stripe payment
-if (proceedBtn) {
-    proceedBtn.addEventListener('click', () => {
-        if (agreeCheckbox.checked && currentStripeLink) {
-            // Track acceptance timestamp (optional - for your records)
-            const acceptanceTime = new Date().toISOString();
-            console.log('✅ User accepted terms at:', acceptanceTime);
-
-            // Optional: Store acceptance in localStorage
-            localStorage.setItem('rho_terms_accepted', acceptanceTime);
-
-            // Redirect to Stripe
-            window.location.href = currentStripeLink;
-        }
-    });
-}
-
-// View full terms link
-if (viewFullTermsLink) {
-    viewFullTermsLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        // Open full terms page in new tab
-        window.open('terms.html', '_blank');
-    });
-}
-
-// Close modal when clicking outside the modal content
-window.addEventListener('click', (e) => {
-    if (e.target === disclaimerModal) {
-        disclaimerModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        currentStripeLink = '';
-    }
-});
-
-// Close modal with ESC key
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && disclaimerModal.style.display === 'block') {
-        disclaimerModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        currentStripeLink = '';
-    }
-});
-
-// Initialize modal after DOM is fully loaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initDisclaimerModal);
-} else {
-    initDisclaimerModal();
-}
