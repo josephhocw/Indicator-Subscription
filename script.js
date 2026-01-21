@@ -20,44 +20,6 @@ if (mobileToggle) {
     });
 }
 
-// Mobile menu styles
-const mobileStyles = `
-    @media (max-width: 768px) {
-        .nav-menu {
-            position: fixed;
-            top: 70px;
-            right: -100%;
-            width: 100%;
-            height: calc(100vh - 70px);
-            background: white;
-            flex-direction: column;
-            padding: 2rem;
-            transition: right 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .nav-menu.active {
-            right: 0;
-        }
-        
-        .mobile-toggle.active span:nth-child(1) {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-        
-        .mobile-toggle.active span:nth-child(2) {
-            opacity: 0;
-        }
-        
-        .mobile-toggle.active span:nth-child(3) {
-            transform: rotate(-45deg) translate(7px, -6px);
-        }
-    }
-`;
-
-const styleSheet = document.createElement("style");
-styleSheet.textContent = mobileStyles;
-document.head.appendChild(styleSheet);
-
 // ===========================
 // Smooth Scrolling
 // ===========================
@@ -235,16 +197,15 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('RHO Market Navigator website loaded successfully!');
 
     // ===========================
-    // IMPORTANT: Protect External Links
+    // IMPORTANT: Protect External Links & Handle Mobile Menu
     // ===========================
-    // Ensure external links (like Stripe billing portal) always work without interference
+    // Ensure external links (like Stripe billing portal) work properly
     document.querySelectorAll('a[href^="http"]').forEach(link => {
         // Skip if it's an internal anchor link
         if (link.getAttribute('href').startsWith('#')) return;
 
-        // Mark as external and ensure it works properly
-        link.addEventListener('click', (e) => {
-            // Allow the link to work normally, close mobile menu if open
+        // Close mobile menu when external link is clicked
+        link.addEventListener('click', () => {
             if (navMenu && navMenu.classList.contains('active')) {
                 navMenu.classList.remove('active');
                 if (mobileToggle) mobileToggle.classList.remove('active');
