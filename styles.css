@@ -517,10 +517,10 @@ p {
     margin: 0 auto;
 }
 
-/* Combo plans - 2 columns centered */
+/* Combo plans - 3 columns */
 #combo-plans {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: 900px;
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -578,6 +578,13 @@ p {
     align-items: center;
     justify-content: center;
 }
+.plan-billing {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
 
 .plan-header {
     min-height: 85px;
