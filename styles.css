@@ -1,6 +1,7 @@
-/* ===========================
-   Global Styles & Variables
-   =========================== */
+/* Previous styles remain the same up to pricing section... */
+/* I'll add the new slider styles at the end */
+
+/* Copy all previous CSS content */
 :root {
     --primary-color: #667eea;
     --secondary-color: #764ba2;
@@ -38,7 +39,6 @@ body {
     padding: 0 20px;
 }
 
-/* Typography */
 h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     line-height: 1.2;
@@ -63,9 +63,6 @@ p {
     background-clip: text;
 }
 
-/* ===========================
-   Navigation
-   =========================== */
 .navbar {
     position: fixed;
     top: 0;
@@ -147,9 +144,6 @@ p {
     transition: var(--transition);
 }
 
-/* ===========================
-   Hero Section
-   =========================== */
 .hero {
     position: relative;
     min-height: auto;
@@ -264,9 +258,6 @@ p {
     box-shadow: var(--shadow-xl);
 }
 
-/* ===========================
-   Buttons
-   =========================== */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -324,9 +315,6 @@ p {
     justify-content: center;
 }
 
-/* ===========================
-   Section Styles
-   =========================== */
 .section-header {
     text-align: center;
     margin-bottom: 4rem;
@@ -354,9 +342,6 @@ p {
     margin: 0 auto;
 }
 
-/* ===========================
-   Features Section
-   =========================== */
 .features {
     padding: 80px 0;
     background: #f8f9fa;
@@ -402,9 +387,6 @@ p {
     margin-bottom: 0.75rem;
 }
 
-/* ===========================
-   How It Works
-   =========================== */
 .how-it-works {
     padding: 80px 0;
 }
@@ -464,10 +446,6 @@ p {
     box-shadow: var(--shadow-md);
 }
 
-
-/* ===========================
-   Pricing Section
-   =========================== */
 .pricing {
     padding: 80px 0;
     background: #f8f9fa;
@@ -511,20 +489,17 @@ p {
     gap: 2rem;
 }
 
-/* Single market plans - 4 columns */
 #single-plans {
     grid-template-columns: repeat(4, 1fr);
     margin: 0 auto;
 }
 
-/* Combo plans - 3 columns */
 #combo-plans {
     grid-template-columns: repeat(3, 1fr);
     max-width: 1200px;
     margin: 0 auto;
 }
 
-/* All markets plan - centered single card */
 #all-plans {
     grid-template-columns: 1fr;
     max-width: 900px;
@@ -578,7 +553,6 @@ p {
     align-items: center;
     justify-content: center;
 }
-
 
 .plan-header {
     min-height: 85px;
@@ -663,9 +637,6 @@ p {
     box-shadow: 0 4px 15px rgba(246, 173, 85, 0.4);
 }
 
-/* ===========================
-   FAQ Section
-   =========================== */
 .faq {
     padding: 80px 0;
 }
@@ -728,9 +699,6 @@ p {
     padding: 0 1.5rem 1.5rem;
 }
 
-/* ===========================
-   CTA Section
-   =========================== */
 .cta {
     padding: 80px 0;
     background: var(--gradient);
@@ -759,9 +727,6 @@ p {
     justify-content: center;
 }
 
-/* ===========================
-   Footer
-   =========================== */
 .footer {
     background: var(--dark-color);
     color: white;
@@ -871,9 +836,6 @@ p {
     color: var(--primary-color);
 }
 
-/* ===========================
-   Scroll to Top Button
-   =========================== */
 .scroll-top {
     position: fixed;
     bottom: 30px;
@@ -906,6 +868,100 @@ p {
 }
 
 /* ===========================
+   MOBILE CARD SLIDER
+   =========================== */
+.pricing-slider-wrapper {
+    position: relative;
+    width: 100%;
+    overflow: visible;
+    padding: 20px 0 40px 0;
+}
+
+.pricing-slider-container {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+}
+
+.pricing-slider-track {
+    display: flex;
+    transition: transform 0.3s ease-out;
+    will-change: transform;
+}
+
+.pricing-slider-track.no-transition {
+    transition: none;
+}
+
+.pricing-card-slide {
+    flex: 0 0 85%;
+    margin-right: 15px;
+}
+
+.pricing-card-slide:last-child {
+    margin-right: 0;
+}
+
+/* Slider navigation dots */
+.slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.slider-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #cbd5e0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.slider-dot.active {
+    background: var(--primary-color);
+    width: 24px;
+    border-radius: 4px;
+}
+
+/* Slider arrows */
+.slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.slider-arrow:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.slider-arrow-left {
+    left: -20px;
+}
+
+.slider-arrow-right {
+    right: -20px;
+}
+
+.slider-arrow.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* ===========================
    Responsive Design
    =========================== */
 @media (max-width: 992px) {
@@ -920,11 +976,32 @@ p {
     .footer-content {
         grid-template-columns: 1fr 1fr;
     }
+    
+    #single-plans {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    #combo-plans {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
-    h1 { font-size: 2.5rem; }
-    h2 { font-size: 2rem; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.25rem; }
+    
+    .container {
+        padding: 0 15px;
+    }
+    
+    .features,
+    .how-it-works,
+    .pricing,
+    .faq,
+    .cta {
+        padding: 60px 0;
+    }
     
     .nav-menu {
         position: fixed;
@@ -944,6 +1021,10 @@ p {
         right: 0;
     }
     
+    .mobile-toggle {
+        display: flex;
+    }
+    
     .mobile-toggle.active span:nth-child(1) {
         transform: rotate(45deg) translate(5px, 5px);
     }
@@ -956,16 +1037,27 @@ p {
         transform: rotate(-45deg) translate(7px, -6px);
     }
     
-    .mobile-toggle {
-        display: flex;
+    .hero {
+        padding: 80px 0 40px;
     }
     
     .hero-title {
-        font-size: 2.5rem;
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+    
+    .hero-description {
+        font-size: 1rem;
     }
     
     .hero-buttons {
         flex-direction: column;
+        width: 100%;
+    }
+    
+    .hero-buttons .btn {
+        width: 100%;
+        justify-content: center;
     }
     
     .hero-stats {
@@ -973,19 +1065,102 @@ p {
         gap: 1rem;
     }
     
-    .steps-grid,
-    .features-grid,
-    .pricing-grid,
-    .showcase-grid {
+    .section-header {
+        margin-bottom: 2rem;
+    }
+    
+    .section-header h2 {
+        font-size: 1.75rem;
+    }
+    
+    .section-header p {
+        font-size: 1rem;
+    }
+    
+    .features-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .feature-card {
+        padding: 1.5rem;
+    }
+    
+    .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    /* MOBILE: Convert pricing grids to slider */
+    #single-plans,
+    #combo-plans,
+    #all-plans {
+        display: block !important;
+        grid-template-columns: none;
+        max-width: 100%;
+    }
+    
+    .pricing-grid {
+        display: block;
+    }
+    
+    /* Show slider wrapper only on mobile */
+    .pricing-slider-wrapper {
+        display: block;
+    }
+    
+    .pricing-card {
+        margin-bottom: 0;
+    }
+    
+    .pricing-card.featured {
+        transform: scale(1);
     }
     
     .plan-tabs {
         flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .tab-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .plan-price {
+        min-height: auto;
+    }
+    
+    .amount {
+        font-size: 2.5rem;
+    }
+    
+    .plan-features li {
+        font-size: 0.9rem;
+        min-height: auto;
+        padding: 0.5rem 0;
+    }
+    
+    .cta-content h2 {
+        font-size: 1.75rem;
+    }
+    
+    .cta-content p {
+        font-size: 1rem;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .cta-buttons .btn {
+        width: 100%;
     }
     
     .footer-content {
         grid-template-columns: 1fr;
+        gap: 2rem;
     }
     
     .footer-bottom {
@@ -994,7 +1169,69 @@ p {
         text-align: center;
     }
     
-    .cta-buttons {
+    .footer-links {
         flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .faq-question span {
+        font-size: 1rem;
+    }
+    
+    .faq-answer p {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.5rem; }
+    
+    .hero-title {
+        font-size: 1.75rem;
+    }
+    
+    .amount {
+        font-size: 2rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .feature-icon,
+    .step-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .feature-icon i,
+    .step-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .pricing-card {
+        padding: 1.5rem;
+    }
+    
+    .plan-header {
+        min-height: auto;
+    }
+    
+    .pricing-card-slide {
+        flex: 0 0 90%;
+    }
+}
+
+/* Desktop: Hide slider elements */
+@media (min-width: 769px) {
+    .pricing-slider-wrapper {
+        display: none;
+    }
+    
+    .slider-dots,
+    .slider-arrow {
+        display: none;
     }
 }

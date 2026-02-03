@@ -36,7 +36,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 behavior: 'smooth'
             });
 
-            // Close mobile menu if open
             navMenu.classList.remove('active');
             mobileToggle.classList.remove('active');
         }
@@ -97,17 +96,231 @@ faqItems.forEach(item => {
     const question = item.querySelector('.faq-question');
 
     question.addEventListener('click', () => {
-        // Close other items
         faqItems.forEach(otherItem => {
             if (otherItem !== item && otherItem.classList.contains('active')) {
                 otherItem.classList.remove('active');
             }
         });
 
-        // Toggle current item
         item.classList.toggle('active');
     });
 });
+
+// ===========================
+// MOBILE PRICING CARD SLIDER
+// ===========================
+class PricingSlider {
+    constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        if (!this.container) return;
+
+        this.currentIndex = 0;
+        this.startX = 0;
+        this.currentX = 0;
+        this.isDragging = false;
+        this.sliderWrapper = null;
+        this.sliderContainer = null;
+        this.sliderTrack = null;
+        this.dots = [];
+
+        this.init();
+    }
+
+    init() {
+        if (window.innerWidth > 768) return; // Only init on mobile
+
+        const cards = this.container.querySelectorAll('.pricing-card');
+        if (cards.length === 0) return;
+
+        // Create slider structure
+        this.createSliderStructure(cards);
+
+        // Add touch/mouse events
+        this.addEventListeners();
+
+        // Create dots
+        this.createDots(cards.length);
+
+        // Create arrows
+        this.createArrows();
+
+        // Initial update
+        this.updateSlider();
+    }
+
+    createSliderStructure(cards) {
+        // Create wrapper
+        this.sliderWrapper = document.createElement('div');
+        this.sliderWrapper.className = 'pricing-slider-wrapper';
+
+        // Create container
+        this.sliderContainer = document.createElement('div');
+        this.sliderContainer.className = 'pricing-slider-container';
+
+        // Create track
+        this.sliderTrack = document.createElement('div');
+        this.sliderTrack.className = 'pricing-slider-track';
+
+        // Move cards into slider
+        cards.forEach(card => {
+            const slide = document.createElement('div');
+            slide.className = 'pricing-card-slide';
+            slide.appendChild(card.cloneNode(true));
+            this.sliderTrack.appendChild(slide);
+        });
+
+        // Assemble structure
+        this.sliderContainer.appendChild(this.sliderTrack);
+        this.sliderWrapper.appendChild(this.sliderContainer);
+
+        // Replace original content
+        this.container.innerHTML = '';
+        this.container.appendChild(this.sliderWrapper);
+    }
+
+    createDots(count) {
+        const dotsContainer = document.createElement('div');
+        dotsContainer.className = 'slider-dots';
+
+        for (let i = 0; i < count; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'slider-dot';
+            if (i === 0) dot.classList.add('active');
+
+            dot.addEventListener('click', () => {
+                this.goToSlide(i);
+            });
+
+            this.dots.push(dot);
+            dotsContainer.appendChild(dot);
+        }
+
+        this.sliderWrapper.appendChild(dotsContainer);
+    }
+
+    createArrows() {
+        // Left arrow
+        const leftArrow = document.createElement('div');
+        leftArrow.className = 'slider-arrow slider-arrow-left disabled';
+        leftArrow.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        leftArrow.addEventListener('click', () => this.prev());
+
+        // Right arrow
+        const rightArrow = document.createElement('div');
+        rightArrow.className = 'slider-arrow slider-arrow-right';
+        rightArrow.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        rightArrow.addEventListener('click', () => this.next());
+
+        this.sliderWrapper.appendChild(leftArrow);
+        this.sliderWrapper.appendChild(rightArrow);
+
+        this.leftArrow = leftArrow;
+        this.rightArrow = rightArrow;
+    }
+
+    addEventListeners() {
+        // Touch events
+        this.sliderTrack.addEventListener('touchstart', (e) => this.handleStart(e), { passive: true });
+        this.sliderTrack.addEventListener('touchmove', (e) => this.handleMove(e), { passive: true });
+        this.sliderTrack.addEventListener('touchend', () => this.handleEnd());
+
+        // Mouse events for testing on desktop
+        this.sliderTrack.addEventListener('mousedown', (e) => this.handleStart(e));
+        this.sliderTrack.addEventListener('mousemove', (e) => this.handleMove(e));
+        this.sliderTrack.addEventListener('mouseup', () => this.handleEnd());
+        this.sliderTrack.addEventListener('mouseleave', () => this.handleEnd());
+    }
+
+    handleStart(e) {
+        this.isDragging = true;
+        this.startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+        this.sliderTrack.classList.add('no-transition');
+    }
+
+    handleMove(e) {
+        if (!this.isDragging) return;
+
+        this.currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+        const diff = this.currentX - this.startX;
+
+        // Add drag effect
+        const currentTranslate = -this.currentIndex * (85 + 1.5); // 85% + gap
+        const dragPercent = (diff / window.innerWidth) * 100;
+        this.sliderTrack.style.transform = `translateX(${currentTranslate + dragPercent}%)`;
+    }
+
+    handleEnd() {
+        if (!this.isDragging) return;
+
+        this.isDragging = false;
+        this.sliderTrack.classList.remove('no-transition');
+
+        const diff = this.currentX - this.startX;
+        const threshold = 50; // px
+
+        if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+                this.prev();
+            } else {
+                this.next();
+            }
+        } else {
+            this.updateSlider();
+        }
+
+        this.startX = 0;
+        this.currentX = 0;
+    }
+
+    prev() {
+        if (this.currentIndex > 0) {
+            this.currentIndex--;
+            this.updateSlider();
+        }
+    }
+
+    next() {
+        const slides = this.sliderTrack.querySelectorAll('.pricing-card-slide');
+        if (this.currentIndex < slides.length - 1) {
+            this.currentIndex++;
+            this.updateSlider();
+        }
+    }
+
+    goToSlide(index) {
+        this.currentIndex = index;
+        this.updateSlider();
+    }
+
+    updateSlider() {
+        // Update transform
+        const offset = -this.currentIndex * (85 + 1.5); // 85% width + 1.5% gap
+        this.sliderTrack.style.transform = `translateX(${offset}%)`;
+
+        // Update dots
+        this.dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === this.currentIndex);
+        });
+
+        // Update arrows
+        const slides = this.sliderTrack.querySelectorAll('.pricing-card-slide');
+        this.leftArrow.classList.toggle('disabled', this.currentIndex === 0);
+        this.rightArrow.classList.toggle('disabled', this.currentIndex === slides.length - 1);
+    }
+}
+
+// Initialize sliders for each pricing category
+let currentSliders = {};
+
+function initPricingSliders() {
+    if (window.innerWidth <= 768) {
+        currentSliders = {
+            single: new PricingSlider('single-plans'),
+            combo: new PricingSlider('combo-plans'),
+            all: new PricingSlider('all-plans')
+        };
+    }
+}
 
 // ===========================
 // Pricing Tab Switcher
@@ -117,11 +330,9 @@ const planCategories = document.querySelectorAll('.plan-category');
 
 tabBtns.forEach((btn, index) => {
     btn.addEventListener('click', () => {
-        // Remove active class from all buttons and categories
         tabBtns.forEach(b => b.classList.remove('active'));
         planCategories.forEach(c => c.classList.remove('active'));
 
-        // Add active class to clicked button and corresponding category
         btn.classList.add('active');
 
         const categoryMap = {
@@ -134,6 +345,13 @@ tabBtns.forEach((btn, index) => {
         const targetCategory = document.getElementById(categoryMap[category]);
         if (targetCategory) {
             targetCategory.classList.add('active');
+
+            // Reinitialize slider for the newly active category on mobile
+            if (window.innerWidth <= 768) {
+                setTimeout(() => {
+                    currentSliders[category] = new PricingSlider(categoryMap[category]);
+                }, 100);
+            }
         }
     });
 });
@@ -196,15 +414,28 @@ pricingCards.forEach(card => {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('RHO Market Navigator website loaded successfully!');
 
-    // ===========================
-    // IMPORTANT: Protect External Links & Handle Mobile Menu
-    // ===========================
-    // Ensure external links (like Stripe billing portal) work properly
+    // Initialize pricing sliders on mobile
+    initPricingSliders();
+
+    // Reinitialize on window resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            // Reload sliders if switching between mobile/desktop
+            if (window.innerWidth <= 768 && Object.keys(currentSliders).length === 0) {
+                initPricingSliders();
+            } else if (window.innerWidth > 768 && Object.keys(currentSliders).length > 0) {
+                // Reset to original grid layout
+                window.location.reload();
+            }
+        }, 250);
+    });
+
+    // Protect external links
     document.querySelectorAll('a[href^="http"]').forEach(link => {
-        // Skip if it's an internal anchor link
         if (link.getAttribute('href').startsWith('#')) return;
 
-        // Close mobile menu when external link is clicked
         link.addEventListener('click', () => {
             if (navMenu && navMenu.classList.contains('active')) {
                 navMenu.classList.remove('active');
@@ -213,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Track page views (replace with your analytics if needed)
+    // Track page views
     if (typeof gtag !== 'undefined') {
         gtag('event', 'page_view', {
             page_title: document.title,
@@ -226,7 +457,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // ===========================
 // Performance Optimization
 // ===========================
-// Debounce function for scroll events
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -239,7 +469,6 @@ function debounce(func, wait) {
     };
 }
 
-// Apply debounce to scroll events for better performance
 const debouncedScroll = debounce(() => {
     // Additional scroll logic can be added here if needed
 }, 100);
