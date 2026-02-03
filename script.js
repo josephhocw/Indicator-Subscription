@@ -132,6 +132,12 @@ class PricingSlider {
         const cards = this.container.querySelectorAll('.pricing-card');
         if (cards.length === 0) return;
 
+        // Skip slider if only 1 card (e.g., All Markets)
+        if (cards.length === 1) {
+            console.log(`Skipping slider for ${this.container.id} - only 1 card`);
+            return;
+        }
+
         // Create slider structure
         this.createSliderStructure(cards);
 
@@ -314,11 +320,15 @@ let currentSliders = {};
 
 function initPricingSliders() {
     if (window.innerWidth <= 768) {
-        currentSliders = {
-            single: new PricingSlider('single-plans'),
-            combo: new PricingSlider('combo-plans'),
-            all: new PricingSlider('all-plans')
-        };
+        // Only initialize slider for the currently active tab
+        const activeCategory = document.querySelector('.plan-category.active');
+        if (activeCategory) {
+            const categoryId = activeCategory.id;
+            console.log(`Initializing slider for active category: ${categoryId}`);
+
+            const categoryKey = categoryId.replace('-plans', ''); // e.g., 'single-plans' -> 'single'
+            currentSliders[categoryKey] = new PricingSlider(categoryId);
+        }
     }
 }
 
