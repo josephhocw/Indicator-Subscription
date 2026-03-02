@@ -484,3 +484,61 @@ const debouncedScroll = debounce(() => {
 }, 100);
 
 window.addEventListener('scroll', debouncedScroll, { passive: true });
+
+// ===========================
+// Disclaimer Modal
+// ===========================
+const modal = document.getElementById('disclaimerModal');
+const agreeCheckbox = document.getElementById('agreeCheckbox');
+const proceedBtn = document.getElementById('proceedBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+const viewFullTerms = document.getElementById('viewFullTerms');
+
+let pendingUrl = null;
+
+// Intercept all Subscribe Now / payment buttons
+document.querySelectorAll('a[href^="https://buy.stripe.com"]').forEach(link => {
+    link.addEventListener('click', function (e) {
+        e.preventDefault();
+        pendingUrl = this.href;
+        agreeCheckbox.checked = false;
+        proceedBtn.disabled = true;
+        modal.style.display = 'flex';
+    });
+});
+
+// Enable Proceed button only when checkbox is ticked
+agreeCheckbox.addEventListener('change', () => {
+    proceedBtn.disabled = !agreeCheckbox.checked;
+});
+
+// Proceed to Stripe
+proceedBtn.addEventListener('click', () => {
+    if (pendingUrl && agreeCheckbox.checked) {
+        modal.style.display = 'none';
+        window.open(pendingUrl, '_blank', 'noopener,noreferrer');
+        pendingUrl = null;
+    }
+});
+
+// Cancel
+cancelBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+    pendingUrl = null;
+});
+
+// Close on backdrop click
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        modal.style.display = 'none';
+        pendingUrl = null;
+    }
+});
+
+// View full terms link
+if (viewFullTerms) {
+    viewFullTerms.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.open('terms.html', '_blank');
+    });
+}
