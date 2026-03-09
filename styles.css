@@ -1303,3 +1303,41 @@ p {
     gap: 1rem;
     justify-content: flex-end;
 }
+
+/* Mobile slider */
+    .plan-category.active {
+        display: block;
+        overflow: hidden;
+    }
+
+    .slider-track {
+        display: flex;
+        transition: transform 0.35s ease;
+        will-change: transform;
+    }
+
+    .slider-track .pricing-card {
+        min-width: 100%;
+        flex-shrink: 0;
+        box-sizing: border-box;
+    }
+
+    .slider-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 1.25rem;
+    }
+
+    .slider-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #d1d5db;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .slider-dot.active {
+        background: var(--primary-color);
+    }

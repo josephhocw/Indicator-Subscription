@@ -542,3 +542,87 @@ if (viewFullTerms) {
         window.open('terms.html', '_blank');
     });
 }
+
+// ===========================
+// Mobile Pricing Slider
+// ===========================
+function initMobilePricingSlider() {
+    if (window.innerWidth > 768) return;
+
+    document.querySelectorAll('.plan-category').forEach(grid => {
+        const cards = Array.from(grid.querySelectorAll('.pricing-card'));
+        if (cards.length < 2) return;
+
+        // Already initialized
+        if (grid.dataset.sliderInit) return;
+        grid.dataset.sliderInit = 'true';
+
+        let currentIndex = 0;
+
+        // Wrap cards in a slider track
+        const track = document.createElement('div');
+        track.className = 'slider-track';
+        cards.forEach(card => track.appendChild(card));
+        grid.appendChild(track);
+
+        // Dots
+        const dotsContainer = document.createElement('div');
+        dotsContainer.className = 'slider-dots';
+        cards.forEach((_, i) => {
+            const dot = document.createElement('span');
+            dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goTo(i));
+            dotsContainer.appendChild(dot);
+        });
+        grid.after(dotsContainer);
+
+        function goTo(index) {
+            currentIndex = Math.max(0, Math.min(index, cards.length - 1));
+            track.style.transform = `translateX(-${currentIndex * 100}%)`;
+            dotsContainer.querySelectorAll('.slider-dot').forEach((d, i) => {
+                d.classList.toggle('active', i === currentIndex);
+            });
+        }
+
+        // Touch handling — key fix: only swipe if deltaX > threshold
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchMoved = false;
+
+        track.addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchMoved = false;
+        }, { passive: true });
+
+        track.addEventListener('touchmove', e => {
+            const dx = Math.abs(e.touches[0].clientX - touchStartX);
+            const dy = Math.abs(e.touches[0].clientY - touchStartY);
+            // Only mark as moved if horizontal drag is dominant and meaningful
+            if (dx > 8 && dx > dy) {
+                touchMoved = true;
+            }
+        }, { passive: true });
+
+        track.addEventListener('touchend', e => {
+            if (!touchMoved) return; // was a tap — let click fire normally
+
+            const deltaX = e.changedTouches[0].clientX - touchStartX;
+            if (Math.abs(deltaX) > 50) {
+                deltaX < 0 ? goTo(currentIndex + 1) : goTo(currentIndex - 1);
+            }
+            touchMoved = false;
+        });
+    });
+}
+
+// Run on load and after tab switches (new category becomes active)
+document.addEventListener('DOMContentLoaded', initMobilePricingSlider);
+
+// Re-init when tabs are switched on mobile
+tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        setTimeout(initMobilePricingSlider, 50);
+    });
+});
+
