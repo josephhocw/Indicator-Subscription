@@ -1097,16 +1097,15 @@ p {
        Mobile Pricing Slider
        =========================== */
 
-    /* Override grid for slider categories */
-    #single-plans,
-    #combo-plans {
+    /* FIX: Only override display for ACTIVE categories */
+    #single-plans.active,
+    #combo-plans.active {
         display: block !important;
         grid-template-columns: unset !important;
         max-width: 100% !important;
     }
 
-    /* All-markets: single card, just show normally */
-    #all-plans {
+    #all-plans.active {
         display: block !important;
         grid-template-columns: unset !important;
         max-width: 100% !important;
@@ -1134,7 +1133,9 @@ p {
     /* Each card = one full slot */
     .slider-track .pricing-card {
         min-width: 100%;
-        flex-shrink: 0;
+        max-width: 100%;
+        width: 100%;
+        flex: 0 0 100%;
         box-sizing: border-box;
         /* FIX: non-active slides cannot receive clicks */
         pointer-events: none;

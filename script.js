@@ -131,7 +131,12 @@ tabBtns.forEach((btn) => {
             targetCategory.classList.add('active');
             // Re-init slider for newly visible category on mobile
             if (window.innerWidth <= 768) {
-                initSliderForGrid(targetCategory);
+                // Use requestAnimationFrame to ensure the element is visible before measuring
+                requestAnimationFrame(() => {
+                    initSliderForGrid(targetCategory);
+                    addSwipeSupport(targetCategory);
+                    bindStripeLinks();
+                });
             }
         }
     });
@@ -244,7 +249,7 @@ if (viewFullTerms) {
     });
 }
 
-// Intercept ALL Stripe buy links (works for both desktop cards and mobile slider)
+// Intercept ALL Stripe buy links
 function bindStripeLinks() {
     document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
         // Remove any previous listener to avoid duplicates
@@ -264,22 +269,43 @@ function stripeClickHandler(e) {
 // ===========================
 const MOBILE_BREAKPOINT = 768;
 
+function destroySlider(grid) {
+    /**
+     * Tear down an existing slider so it can be rebuilt cleanly.
+     * Moves cards back out of the wrapper/track into the grid root.
+     */
+    const wrapper = grid.querySelector('.slider-wrapper');
+    if (!wrapper) return;
+
+    const track = wrapper.querySelector('.slider-track');
+    if (track) {
+        // Move cards back to the grid root
+        const cards = Array.from(track.querySelectorAll(':scope > .pricing-card'));
+        cards.forEach(card => {
+            card.style.minHeight = '';
+            card.classList.remove('slide-active');
+            grid.appendChild(card);
+        });
+    }
+    wrapper.remove();
+
+    // Clean up data attributes
+    delete grid.dataset.currentSlide;
+    delete grid.dataset.totalSlides;
+}
+
 function initSliderForGrid(grid) {
     if (!grid) return;
 
-    // Remove old slider if re-initialising
-    const oldWrapper = grid.querySelector('.slider-wrapper');
-    if (oldWrapper) {
-        // Already set up – just update pointer-events in case it's stale
-        updateSliderPointerEvents(grid);
-        return;
-    }
+    // Always rebuild fresh to avoid stale state
+    destroySlider(grid);
 
     const cards = Array.from(grid.querySelectorAll(':scope > .pricing-card'));
     if (cards.length === 0) return;
 
     // Single card (All Markets): no slider needed, just bind links
     if (cards.length === 1) {
+        cards[0].style.pointerEvents = 'auto';
         bindStripeLinks();
         return;
     }
@@ -317,7 +343,7 @@ function initSliderForGrid(grid) {
     grid.dataset.currentSlide = '0';
     grid.dataset.totalSlides = String(cards.length);
 
-    // Equalise card heights
+    // Equalise card heights after layout settles
     requestAnimationFrame(() => equaliseCardHeights(grid));
 
     bindStripeLinks();
@@ -326,7 +352,7 @@ function initSliderForGrid(grid) {
 function goToSlide(grid, index) {
     const track = grid.querySelector('.slider-track');
     const dots = grid.querySelectorAll('.slider-dot');
-    const cards = grid.querySelectorAll('.pricing-card');
+    const cards = grid.querySelectorAll('.slider-track .pricing-card');
 
     if (!track) return;
 
@@ -342,13 +368,6 @@ function goToSlide(grid, index) {
 
     dots.forEach((dot, i) => {
         dot.classList.toggle('active', i === index);
-    });
-}
-
-function updateSliderPointerEvents(grid) {
-    const current = parseInt(grid.dataset.currentSlide || '0', 10);
-    grid.querySelectorAll('.pricing-card').forEach((card, i) => {
-        card.classList.toggle('slide-active', i === current);
     });
 }
 
@@ -421,6 +440,11 @@ window.addEventListener('resize', () => {
         if (window.innerWidth <= MOBILE_BREAKPOINT) {
             initAllMobileSliders();
             postSliderInit();
+        } else {
+            // Desktop: destroy all sliders so cards go back to grid
+            document.querySelectorAll('.plan-category').forEach(grid => {
+                destroySlider(grid);
+            });
         }
     }, 250);
 });
