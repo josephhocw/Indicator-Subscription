@@ -36,6 +36,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 behavior: 'smooth'
             });
 
+            // Close mobile menu if open
             navMenu.classList.remove('active');
             mobileToggle.classList.remove('active');
         }
@@ -72,7 +73,6 @@ window.addEventListener('scroll', () => {
     let current = '';
     sections.forEach(section => {
         const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
 
         if (window.pageYOffset >= sectionTop - 200) {
             current = section.getAttribute('id');
@@ -107,238 +107,12 @@ faqItems.forEach(item => {
 });
 
 // ===========================
-// MOBILE PRICING CARD SLIDER
-// ===========================
-class PricingSlider {
-    constructor(containerId) {
-        this.container = document.getElementById(containerId);
-        if (!this.container) return;
-
-        this.currentIndex = 0;
-        this.startX = 0;
-        this.currentX = 0;
-        this.isDragging = false;
-        this.sliderWrapper = null;
-        this.sliderContainer = null;
-        this.sliderTrack = null;
-        this.dots = [];
-
-        this.init();
-    }
-
-    init() {
-        if (window.innerWidth > 768) return; // Only init on mobile
-
-        const cards = this.container.querySelectorAll('.pricing-card');
-        if (cards.length === 0) return;
-
-        // Skip slider if only 1 card (e.g., All Markets)
-        if (cards.length === 1) {
-            console.log(`Skipping slider for ${this.container.id} - only 1 card`);
-            return;
-        }
-
-        // Create slider structure
-        this.createSliderStructure(cards);
-
-        // Add touch/mouse events
-        this.addEventListeners();
-
-        // Create dots
-        this.createDots(cards.length);
-
-        // Create arrows
-        this.createArrows();
-
-        // Initial update
-        this.updateSlider();
-    }
-
-    createSliderStructure(cards) {
-        // Create wrapper
-        this.sliderWrapper = document.createElement('div');
-        this.sliderWrapper.className = 'pricing-slider-wrapper';
-
-        // Create container
-        this.sliderContainer = document.createElement('div');
-        this.sliderContainer.className = 'pricing-slider-container';
-
-        // Create track
-        this.sliderTrack = document.createElement('div');
-        this.sliderTrack.className = 'pricing-slider-track';
-
-        // Move cards into slider
-        cards.forEach(card => {
-            const slide = document.createElement('div');
-            slide.className = 'pricing-card-slide';
-            slide.appendChild(card.cloneNode(true));
-            this.sliderTrack.appendChild(slide);
-        });
-
-        // Assemble structure
-        this.sliderContainer.appendChild(this.sliderTrack);
-        this.sliderWrapper.appendChild(this.sliderContainer);
-
-        // Replace original content
-        this.container.innerHTML = '';
-        this.container.appendChild(this.sliderWrapper);
-    }
-
-    createDots(count) {
-        const dotsContainer = document.createElement('div');
-        dotsContainer.className = 'slider-dots';
-
-        for (let i = 0; i < count; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'slider-dot';
-            if (i === 0) dot.classList.add('active');
-
-            dot.addEventListener('click', () => {
-                this.goToSlide(i);
-            });
-
-            this.dots.push(dot);
-            dotsContainer.appendChild(dot);
-        }
-
-        this.sliderWrapper.appendChild(dotsContainer);
-    }
-
-    createArrows() {
-        // Left arrow
-        const leftArrow = document.createElement('div');
-        leftArrow.className = 'slider-arrow slider-arrow-left disabled';
-        leftArrow.innerHTML = '<i class="fas fa-chevron-left"></i>';
-        leftArrow.addEventListener('click', () => this.prev());
-
-        // Right arrow
-        const rightArrow = document.createElement('div');
-        rightArrow.className = 'slider-arrow slider-arrow-right';
-        rightArrow.innerHTML = '<i class="fas fa-chevron-right"></i>';
-        rightArrow.addEventListener('click', () => this.next());
-
-        this.sliderWrapper.appendChild(leftArrow);
-        this.sliderWrapper.appendChild(rightArrow);
-
-        this.leftArrow = leftArrow;
-        this.rightArrow = rightArrow;
-    }
-
-    addEventListeners() {
-        // Touch events
-        this.sliderTrack.addEventListener('touchstart', (e) => this.handleStart(e), { passive: true });
-        this.sliderTrack.addEventListener('touchmove', (e) => this.handleMove(e), { passive: true });
-        this.sliderTrack.addEventListener('touchend', () => this.handleEnd());
-
-        // Mouse events for testing on desktop
-        this.sliderTrack.addEventListener('mousedown', (e) => this.handleStart(e));
-        this.sliderTrack.addEventListener('mousemove', (e) => this.handleMove(e));
-        this.sliderTrack.addEventListener('mouseup', () => this.handleEnd());
-        this.sliderTrack.addEventListener('mouseleave', () => this.handleEnd());
-    }
-
-    handleStart(e) {
-        this.isDragging = true;
-        this.startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-        this.sliderTrack.classList.add('no-transition');
-    }
-
-    handleMove(e) {
-        if (!this.isDragging) return;
-
-        this.currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-        const diff = this.currentX - this.startX;
-
-        // Add drag effect
-        const currentTranslate = -this.currentIndex * (85 + 1.5); // 85% + gap
-        const dragPercent = (diff / window.innerWidth) * 100;
-        this.sliderTrack.style.transform = `translateX(${currentTranslate + dragPercent}%)`;
-    }
-
-    handleEnd() {
-        if (!this.isDragging) return;
-
-        this.isDragging = false;
-        this.sliderTrack.classList.remove('no-transition');
-
-        const diff = this.currentX - this.startX;
-        const threshold = 50; // px
-
-        if (Math.abs(diff) > threshold) {
-            if (diff > 0) {
-                this.prev();
-            } else {
-                this.next();
-            }
-        } else {
-            this.updateSlider();
-        }
-
-        this.startX = 0;
-        this.currentX = 0;
-    }
-
-    prev() {
-        if (this.currentIndex > 0) {
-            this.currentIndex--;
-            this.updateSlider();
-        }
-    }
-
-    next() {
-        const slides = this.sliderTrack.querySelectorAll('.pricing-card-slide');
-        if (this.currentIndex < slides.length - 1) {
-            this.currentIndex++;
-            this.updateSlider();
-        }
-    }
-
-    goToSlide(index) {
-        this.currentIndex = index;
-        this.updateSlider();
-    }
-
-    updateSlider() {
-        // Update transform
-        const offset = -this.currentIndex * (85 + 1.5); // 85% width + 1.5% gap
-        this.sliderTrack.style.transform = `translateX(${offset}%)`;
-
-        // Update dots
-        this.dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === this.currentIndex);
-        });
-
-        // Update arrows
-        const slides = this.sliderTrack.querySelectorAll('.pricing-card-slide');
-        this.leftArrow.classList.toggle('disabled', this.currentIndex === 0);
-        this.rightArrow.classList.toggle('disabled', this.currentIndex === slides.length - 1);
-    }
-}
-
-// Initialize sliders for each pricing category
-let currentSliders = {};
-
-function initPricingSliders() {
-    if (window.innerWidth <= 768) {
-        // Only initialize slider for the currently active tab
-        const activeCategory = document.querySelector('.plan-category.active');
-        if (activeCategory) {
-            const categoryId = activeCategory.id;
-            console.log(`Initializing slider for active category: ${categoryId}`);
-
-            const categoryKey = categoryId.replace('-plans', ''); // e.g., 'single-plans' -> 'single'
-            currentSliders[categoryKey] = new PricingSlider(categoryId);
-        }
-    }
-}
-
-// ===========================
 // Pricing Tab Switcher
 // ===========================
 const tabBtns = document.querySelectorAll('.tab-btn');
 const planCategories = document.querySelectorAll('.plan-category');
 
-tabBtns.forEach((btn, index) => {
+tabBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
         tabBtns.forEach(b => b.classList.remove('active'));
         planCategories.forEach(c => c.classList.remove('active'));
@@ -355,12 +129,9 @@ tabBtns.forEach((btn, index) => {
         const targetCategory = document.getElementById(categoryMap[category]);
         if (targetCategory) {
             targetCategory.classList.add('active');
-
-            // Reinitialize slider for the newly active category on mobile
+            // Re-init slider for newly visible category on mobile
             if (window.innerWidth <= 768) {
-                setTimeout(() => {
-                    currentSliders[category] = new PricingSlider(categoryMap[category]);
-                }, 100);
+                initSliderForGrid(targetCategory);
             }
         }
     });
@@ -383,10 +154,7 @@ window.addEventListener('scroll', () => {
 });
 
 scrollTopBtn.addEventListener('click', () => {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 // ===========================
@@ -419,33 +187,260 @@ pricingCards.forEach(card => {
 });
 
 // ===========================
+// Disclaimer Modal
+// ===========================
+let pendingStripeUrl = null;
+
+const disclaimerModal = document.getElementById('disclaimerModal');
+const agreeCheckbox = document.getElementById('agreeCheckbox');
+const proceedBtn = document.getElementById('proceedBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+const viewFullTerms = document.getElementById('viewFullTerms');
+
+function openDisclaimerModal(stripeUrl) {
+    pendingStripeUrl = stripeUrl;
+    if (agreeCheckbox) agreeCheckbox.checked = false;
+    if (proceedBtn) proceedBtn.disabled = true;
+    if (disclaimerModal) disclaimerModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDisclaimerModal() {
+    if (disclaimerModal) disclaimerModal.classList.remove('active');
+    document.body.style.overflow = '';
+    pendingStripeUrl = null;
+}
+
+if (agreeCheckbox) {
+    agreeCheckbox.addEventListener('change', () => {
+        proceedBtn.disabled = !agreeCheckbox.checked;
+    });
+}
+
+if (proceedBtn) {
+    proceedBtn.addEventListener('click', () => {
+        if (agreeCheckbox && agreeCheckbox.checked && pendingStripeUrl) {
+            closeDisclaimerModal();
+            window.open(pendingStripeUrl, '_blank', 'noopener,noreferrer');
+        }
+    });
+}
+
+if (cancelBtn) {
+    cancelBtn.addEventListener('click', closeDisclaimerModal);
+}
+
+// Close modal if clicking backdrop
+if (disclaimerModal) {
+    disclaimerModal.addEventListener('click', (e) => {
+        if (e.target === disclaimerModal) closeDisclaimerModal();
+    });
+}
+
+if (viewFullTerms) {
+    viewFullTerms.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.open('terms.html', '_blank');
+    });
+}
+
+// Intercept ALL Stripe buy links (works for both desktop cards and mobile slider)
+function bindStripeLinks() {
+    document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
+        // Remove any previous listener to avoid duplicates
+        link.removeEventListener('click', stripeClickHandler);
+        link.addEventListener('click', stripeClickHandler);
+    });
+}
+
+function stripeClickHandler(e) {
+    e.preventDefault();
+    const stripeUrl = this.getAttribute('href');
+    openDisclaimerModal(stripeUrl);
+}
+
+// ===========================
+// Mobile Pricing Slider
+// ===========================
+const MOBILE_BREAKPOINT = 768;
+
+function initSliderForGrid(grid) {
+    if (!grid) return;
+
+    // Remove old slider if re-initialising
+    const oldWrapper = grid.querySelector('.slider-wrapper');
+    if (oldWrapper) {
+        // Already set up – just update pointer-events in case it's stale
+        updateSliderPointerEvents(grid);
+        return;
+    }
+
+    const cards = Array.from(grid.querySelectorAll(':scope > .pricing-card'));
+    if (cards.length === 0) return;
+
+    // Single card (All Markets): no slider needed, just bind links
+    if (cards.length === 1) {
+        bindStripeLinks();
+        return;
+    }
+
+    // Build wrapper > track structure
+    const wrapper = document.createElement('div');
+    wrapper.className = 'slider-wrapper';
+
+    const track = document.createElement('div');
+    track.className = 'slider-track';
+
+    cards.forEach((card, i) => {
+        card.classList.toggle('slide-active', i === 0);
+        track.appendChild(card);
+    });
+
+    wrapper.appendChild(track);
+
+    // Dots
+    const dotsContainer = document.createElement('div');
+    dotsContainer.className = 'slider-dots';
+
+    cards.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+        dot.addEventListener('click', () => goToSlide(grid, i));
+        dotsContainer.appendChild(dot);
+    });
+
+    wrapper.appendChild(dotsContainer);
+    grid.appendChild(wrapper);
+
+    // Store state
+    grid.dataset.currentSlide = '0';
+    grid.dataset.totalSlides = String(cards.length);
+
+    // Equalise card heights
+    requestAnimationFrame(() => equaliseCardHeights(grid));
+
+    bindStripeLinks();
+}
+
+function goToSlide(grid, index) {
+    const track = grid.querySelector('.slider-track');
+    const dots = grid.querySelectorAll('.slider-dot');
+    const cards = grid.querySelectorAll('.pricing-card');
+
+    if (!track) return;
+
+    const total = parseInt(grid.dataset.totalSlides || '0', 10);
+    index = Math.max(0, Math.min(index, total - 1));
+
+    track.style.transform = `translateX(-${index * 100}%)`;
+    grid.dataset.currentSlide = String(index);
+
+    cards.forEach((card, i) => {
+        card.classList.toggle('slide-active', i === index);
+    });
+
+    dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+    });
+}
+
+function updateSliderPointerEvents(grid) {
+    const current = parseInt(grid.dataset.currentSlide || '0', 10);
+    grid.querySelectorAll('.pricing-card').forEach((card, i) => {
+        card.classList.toggle('slide-active', i === current);
+    });
+}
+
+function equaliseCardHeights(grid) {
+    const cards = grid.querySelectorAll('.pricing-card');
+    // Reset first
+    cards.forEach(c => (c.style.minHeight = ''));
+    // Measure
+    let maxH = 0;
+    cards.forEach(c => {
+        maxH = Math.max(maxH, c.offsetHeight);
+    });
+    // Apply
+    if (maxH > 0) {
+        cards.forEach(c => (c.style.minHeight = maxH + 'px'));
+    }
+}
+
+function initAllMobileSliders() {
+    if (window.innerWidth > MOBILE_BREAKPOINT) return;
+
+    document.querySelectorAll('.plan-category').forEach(grid => {
+        // Only init the visible (active) one immediately; others init on tab click
+        if (grid.classList.contains('active')) {
+            initSliderForGrid(grid);
+        }
+    });
+}
+
+// Touch/swipe support
+function addSwipeSupport(grid) {
+    const wrapper = grid.querySelector('.slider-wrapper');
+    if (!wrapper || wrapper.dataset.swipeInit) return;
+    wrapper.dataset.swipeInit = 'true';
+
+    let startX = 0;
+    let isDragging = false;
+
+    wrapper.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+    }, { passive: true });
+
+    wrapper.addEventListener('touchend', (e) => {
+        if (!isDragging) return;
+        const diff = startX - e.changedTouches[0].clientX;
+        const total = parseInt(grid.dataset.totalSlides || '1', 10);
+        const current = parseInt(grid.dataset.currentSlide || '0', 10);
+
+        if (Math.abs(diff) > 50) {
+            if (diff > 0 && current < total - 1) goToSlide(grid, current + 1);
+            if (diff < 0 && current > 0) goToSlide(grid, current - 1);
+        }
+        isDragging = false;
+    }, { passive: true });
+}
+
+// After sliders are inited, also add swipe
+function postSliderInit() {
+    document.querySelectorAll('.plan-category').forEach(grid => {
+        addSwipeSupport(grid);
+    });
+}
+
+// Re-init on resize (desktop ↔ mobile)
+let resizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        if (window.innerWidth <= MOBILE_BREAKPOINT) {
+            initAllMobileSliders();
+            postSliderInit();
+        }
+    }, 250);
+});
+
+// ===========================
 // Initialize Everything on DOM Ready
 // ===========================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('RHO Market Navigator website loaded successfully!');
+    console.log('RHO Market Navigator loaded!');
 
-    // Initialize pricing sliders on mobile
-    initPricingSliders();
+    // Bind disclaimer to all desktop stripe links
+    bindStripeLinks();
 
-    // Reinitialize on window resize
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            // Reload sliders if switching between mobile/desktop
-            if (window.innerWidth <= 768 && Object.keys(currentSliders).length === 0) {
-                initPricingSliders();
-            } else if (window.innerWidth > 768 && Object.keys(currentSliders).length > 0) {
-                // Reset to original grid layout
-                window.location.reload();
-            }
-        }, 250);
-    });
+    // Mobile slider
+    initAllMobileSliders();
+    postSliderInit();
 
-    // Protect external links
+    // External links close mobile menu
     document.querySelectorAll('a[href^="http"]').forEach(link => {
         if (link.getAttribute('href').startsWith('#')) return;
-
         link.addEventListener('click', () => {
             if (navMenu && navMenu.classList.contains('active')) {
                 navMenu.classList.remove('active');
@@ -454,7 +449,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Track page views
     if (typeof gtag !== 'undefined') {
         gtag('event', 'page_view', {
             page_title: document.title,
@@ -470,159 +464,11 @@ document.addEventListener('DOMContentLoaded', () => {
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
+        const later = () => { clearTimeout(timeout); func(...args); };
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
 }
 
-const debouncedScroll = debounce(() => {
-    // Additional scroll logic can be added here if needed
-}, 100);
-
+const debouncedScroll = debounce(() => { }, 100);
 window.addEventListener('scroll', debouncedScroll, { passive: true });
-
-// ===========================
-// Disclaimer Modal
-// ===========================
-const modal = document.getElementById('disclaimerModal');
-const agreeCheckbox = document.getElementById('agreeCheckbox');
-const proceedBtn = document.getElementById('proceedBtn');
-const cancelBtn = document.getElementById('cancelBtn');
-const viewFullTerms = document.getElementById('viewFullTerms');
-
-let pendingUrl = null;
-
-// Intercept all Subscribe Now / payment buttons
-document.querySelectorAll('a[href^="https://buy.stripe.com"]').forEach(link => {
-    link.addEventListener('click', function (e) {
-        e.preventDefault();
-        pendingUrl = this.href;
-        agreeCheckbox.checked = false;
-        proceedBtn.disabled = true;
-        modal.style.display = 'flex';
-    });
-});
-
-// Enable Proceed button only when checkbox is ticked
-agreeCheckbox.addEventListener('change', () => {
-    proceedBtn.disabled = !agreeCheckbox.checked;
-});
-
-// Proceed to Stripe
-proceedBtn.addEventListener('click', () => {
-    if (pendingUrl && agreeCheckbox.checked) {
-        modal.style.display = 'none';
-        window.open(pendingUrl, '_blank', 'noopener,noreferrer');
-        pendingUrl = null;
-    }
-});
-
-// Cancel
-cancelBtn.addEventListener('click', () => {
-    modal.style.display = 'none';
-    pendingUrl = null;
-});
-
-// Close on backdrop click
-modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        modal.style.display = 'none';
-        pendingUrl = null;
-    }
-});
-
-// View full terms link
-if (viewFullTerms) {
-    viewFullTerms.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.open('terms.html', '_blank');
-    });
-}
-
-// ===========================
-// Mobile Pricing Slider
-// ===========================
-function initMobilePricingSlider() {
-    if (window.innerWidth > 768) return;
-
-    document.querySelectorAll('.plan-category').forEach(grid => {
-        const cards = Array.from(grid.querySelectorAll('.pricing-card'));
-        if (cards.length < 2) return;
-
-        // Already initialized
-        if (grid.dataset.sliderInit) return;
-        grid.dataset.sliderInit = 'true';
-
-        let currentIndex = 0;
-
-        // Wrap cards in a slider track
-        const track = document.createElement('div');
-        track.className = 'slider-track';
-        cards.forEach(card => track.appendChild(card));
-        grid.appendChild(track);
-
-        // Dots
-        const dotsContainer = document.createElement('div');
-        dotsContainer.className = 'slider-dots';
-        cards.forEach((_, i) => {
-            const dot = document.createElement('span');
-            dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
-            dot.addEventListener('click', () => goTo(i));
-            dotsContainer.appendChild(dot);
-        });
-        grid.after(dotsContainer);
-
-        function goTo(index) {
-            currentIndex = Math.max(0, Math.min(index, cards.length - 1));
-            track.style.transform = `translateX(-${currentIndex * 100}%)`;
-            dotsContainer.querySelectorAll('.slider-dot').forEach((d, i) => {
-                d.classList.toggle('active', i === currentIndex);
-            });
-        }
-
-        // Touch handling — key fix: only swipe if deltaX > threshold
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchMoved = false;
-
-        track.addEventListener('touchstart', e => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-            touchMoved = false;
-        }, { passive: true });
-
-        track.addEventListener('touchmove', e => {
-            const dx = Math.abs(e.touches[0].clientX - touchStartX);
-            const dy = Math.abs(e.touches[0].clientY - touchStartY);
-            // Only mark as moved if horizontal drag is dominant and meaningful
-            if (dx > 8 && dx > dy) {
-                touchMoved = true;
-            }
-        }, { passive: true });
-
-        track.addEventListener('touchend', e => {
-            if (!touchMoved) return; // was a tap — let click fire normally
-
-            const deltaX = e.changedTouches[0].clientX - touchStartX;
-            if (Math.abs(deltaX) > 50) {
-                deltaX < 0 ? goTo(currentIndex + 1) : goTo(currentIndex - 1);
-            }
-            touchMoved = false;
-        });
-    });
-}
-
-// Run on load and after tab switches (new category becomes active)
-document.addEventListener('DOMContentLoaded', initMobilePricingSlider);
-
-// Re-init when tabs are switched on mobile
-tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        setTimeout(initMobilePricingSlider, 50);
-    });
-});
-

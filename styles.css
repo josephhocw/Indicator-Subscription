@@ -1,7 +1,6 @@
-/* Previous styles remain the same up to pricing section... */
-/* I'll add the new slider styles at the end */
-
-/* Copy all previous CSS content */
+/* ===========================
+   Global Styles & Variables
+   =========================== */
 :root {
     --primary-color: #667eea;
     --secondary-color: #764ba2;
@@ -39,6 +38,7 @@ body {
     padding: 0 20px;
 }
 
+/* Typography */
 h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     line-height: 1.2;
@@ -63,6 +63,9 @@ p {
     background-clip: text;
 }
 
+/* ===========================
+   Navigation
+   =========================== */
 .navbar {
     position: fixed;
     top: 0;
@@ -144,6 +147,9 @@ p {
     transition: var(--transition);
 }
 
+/* ===========================
+   Hero Section
+   =========================== */
 .hero {
     position: relative;
     min-height: auto;
@@ -258,6 +264,9 @@ p {
     box-shadow: var(--shadow-xl);
 }
 
+/* ===========================
+   Buttons
+   =========================== */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -315,6 +324,9 @@ p {
     justify-content: center;
 }
 
+/* ===========================
+   Section Styles
+   =========================== */
 .section-header {
     text-align: center;
     margin-bottom: 4rem;
@@ -342,6 +354,9 @@ p {
     margin: 0 auto;
 }
 
+/* ===========================
+   Features Section
+   =========================== */
 .features {
     padding: 80px 0;
     background: #f8f9fa;
@@ -387,6 +402,9 @@ p {
     margin-bottom: 0.75rem;
 }
 
+/* ===========================
+   How It Works
+   =========================== */
 .how-it-works {
     padding: 80px 0;
 }
@@ -446,6 +464,10 @@ p {
     box-shadow: var(--shadow-md);
 }
 
+
+/* ===========================
+   Pricing Section
+   =========================== */
 .pricing {
     padding: 80px 0;
     background: #f8f9fa;
@@ -478,30 +500,31 @@ p {
 }
 
 .plan-category {
-    display: none !important;
+    display: none;
 }
 
 .plan-category.active {
-    display: grid !important;
+    display: grid;
 }
 
 .pricing-grid {
     gap: 2rem;
 }
 
+/* Single market plans - 4 columns */
 #single-plans {
     grid-template-columns: repeat(4, 1fr);
     margin: 0 auto;
-    align-items: stretch; /* Equal height cards */
 }
 
+/* Combo plans - 3 columns */
 #combo-plans {
     grid-template-columns: repeat(3, 1fr);
     max-width: 1200px;
     margin: 0 auto;
-    align-items: stretch; /* Equal height cards */
 }
 
+/* All markets plan - centered single card */
 #all-plans {
     grid-template-columns: 1fr;
     max-width: 900px;
@@ -517,7 +540,6 @@ p {
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 100%; /* Fill parent height for equal heights */
 }
 
 .pricing-card:hover {
@@ -556,6 +578,7 @@ p {
     align-items: center;
     justify-content: center;
 }
+
 
 .plan-header {
     min-height: 85px;
@@ -640,6 +663,9 @@ p {
     box-shadow: 0 4px 15px rgba(246, 173, 85, 0.4);
 }
 
+/* ===========================
+   FAQ Section
+   =========================== */
 .faq {
     padding: 80px 0;
 }
@@ -702,6 +728,9 @@ p {
     padding: 0 1.5rem 1.5rem;
 }
 
+/* ===========================
+   CTA Section
+   =========================== */
 .cta {
     padding: 80px 0;
     background: var(--gradient);
@@ -730,6 +759,9 @@ p {
     justify-content: center;
 }
 
+/* ===========================
+   Footer
+   =========================== */
 .footer {
     background: var(--dark-color);
     color: white;
@@ -839,6 +871,9 @@ p {
     color: var(--primary-color);
 }
 
+/* ===========================
+   Scroll to Top Button
+   =========================== */
 .scroll-top {
     position: fixed;
     bottom: 30px;
@@ -871,104 +906,111 @@ p {
 }
 
 /* ===========================
-   MOBILE CARD SLIDER
+   Disclaimer Modal
    =========================== */
-.pricing-slider-wrapper {
-    position: relative;
-    width: 100%;
-    overflow: visible;
-    padding: 20px 0 40px 0;
-}
-
-.pricing-slider-container {
-    overflow: hidden;
-    width: 100%;
-    position: relative;
-}
-
-.pricing-slider-track {
-    display: flex;
-    transition: transform 0.3s ease-out;
-    will-change: transform;
-}
-
-.pricing-slider-track.no-transition {
-    transition: none;
-}
-
-.pricing-card-slide {
-    flex: 0 0 85%;
-    margin-right: 15px;
-    display: flex; /* Enable flexbox for equal height children */
-}
-
-.pricing-card-slide:last-child {
-    margin-right: 0;
-}
-
-/* Ensure cards inside slides stretch to full height */
-.pricing-card-slide .pricing-card {
-    width: 100%;
-    height: 100%;
-}
-
-/* Slider navigation dots */
-.slider-dots {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
-}
-
-.slider-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #cbd5e0;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.slider-dot.active {
-    background: var(--primary-color);
-    width: 24px;
-    border-radius: 4px;
-}
-
-/* Slider arrows */
-.slider-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    background: white;
-    border-radius: 50%;
-    display: flex;
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
     align-items: center;
     justify-content: center;
+    padding: 1rem;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 540px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+}
+
+.modal-content h2 {
+    color: var(--dark-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.modal-body {
+    margin-bottom: 1.5rem;
+}
+
+.modal-body ul {
+    padding-left: 1.25rem;
+    margin: 1rem 0;
+}
+
+.modal-body ul li {
+    margin-bottom: 0.6rem;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.checkbox-container {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.checkbox-container label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    z-index: 10;
-    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    color: var(--text-dark);
+    line-height: 1.5;
 }
 
-.slider-arrow:hover {
-    background: var(--primary-color);
-    color: white;
+.checkbox-container input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
 }
 
-.slider-arrow-left {
-    left: -20px;
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
 }
 
-.slider-arrow-right {
-    right: -20px;
+.modal-buttons .btn {
+    min-width: 130px;
+    justify-content: center;
 }
 
-.slider-arrow.disabled {
-    opacity: 0.3;
+#proceedBtn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
     pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        padding: 1.5rem;
+    }
+
+    .modal-buttons {
+        flex-direction: column-reverse;
+    }
+
+    .modal-buttons .btn {
+        width: 100%;
+    }
 }
 
 /* ===========================
@@ -986,32 +1028,11 @@ p {
     .footer-content {
         grid-template-columns: 1fr 1fr;
     }
-    
-    #single-plans {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    #combo-plans {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 @media (max-width: 768px) {
-    h1 { font-size: 2rem; }
-    h2 { font-size: 1.75rem; }
-    h3 { font-size: 1.25rem; }
-    
-    .container {
-        padding: 0 15px;
-    }
-    
-    .features,
-    .how-it-works,
-    .pricing,
-    .faq,
-    .cta {
-        padding: 60px 0;
-    }
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 2rem; }
     
     .nav-menu {
         position: fixed;
@@ -1031,10 +1052,6 @@ p {
         right: 0;
     }
     
-    .mobile-toggle {
-        display: flex;
-    }
-    
     .mobile-toggle.active span:nth-child(1) {
         transform: rotate(45deg) translate(5px, 5px);
     }
@@ -1047,27 +1064,16 @@ p {
         transform: rotate(-45deg) translate(7px, -6px);
     }
     
-    .hero {
-        padding: 80px 0 40px;
+    .mobile-toggle {
+        display: flex;
     }
     
     .hero-title {
-        font-size: 2rem;
-        line-height: 1.2;
-    }
-    
-    .hero-description {
-        font-size: 1rem;
+        font-size: 2.5rem;
     }
     
     .hero-buttons {
         flex-direction: column;
-        width: 100%;
-    }
-    
-    .hero-buttons .btn {
-        width: 100%;
-        justify-content: center;
     }
     
     .hero-stats {
@@ -1075,110 +1081,101 @@ p {
         gap: 1rem;
     }
     
-    .section-header {
-        margin-bottom: 2rem;
-    }
-    
-    .section-header h2 {
-        font-size: 1.75rem;
-    }
-    
-    .section-header p {
-        font-size: 1rem;
-    }
-    
-    .features-grid {
+    .steps-grid,
+    .features-grid,
+    .showcase-grid {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
     }
-    
-    .feature-card {
-        padding: 1.5rem;
-    }
-    
-    .steps-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-    
-    /* MOBILE: Convert pricing grids to slider */
-    .plan-category {
-        display: none !important; /* Hide all by default */
-    }
-    
-    .plan-category.active {
-        display: block !important; /* Show only active */
-    }
-    
-    #single-plans.active,
-    #combo-plans.active,
-    #all-plans.active {
-        display: block !important;
-        grid-template-columns: none;
-        max-width: 100%;
-    }
-    
-    .pricing-grid {
-        display: block;
-    }
-    
-    /* Show slider wrapper only on mobile */
-    .pricing-slider-wrapper {
-        display: block;
-    }
-    
-    .pricing-card {
-        margin-bottom: 0;
-    }
-    
-    .pricing-card.featured {
-        transform: scale(1);
-    }
-    
+
+    /* Pricing tabs stack vertically */
     .plan-tabs {
         flex-direction: column;
-        gap: 0.75rem;
+        align-items: center;
     }
-    
-    .tab-btn {
+
+    /* ===========================
+       Mobile Pricing Slider
+       =========================== */
+
+    /* Override grid for slider categories */
+    #single-plans,
+    #combo-plans {
+        display: block !important;
+        grid-template-columns: unset !important;
+        max-width: 100% !important;
+    }
+
+    /* All-markets: single card, just show normally */
+    #all-plans {
+        display: block !important;
+        grid-template-columns: unset !important;
+        max-width: 100% !important;
+    }
+
+    #all-plans .pricing-card {
+        pointer-events: auto !important;
+    }
+
+    /* Slider wrapper clips overflow */
+    .slider-wrapper {
         width: 100%;
-        text-align: center;
+        overflow: hidden;
+        position: relative;
     }
-    
-    .plan-price {
-        min-height: auto;
+
+    /* Sliding track */
+    .slider-track {
+        display: flex;
+        transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        will-change: transform;
+        align-items: stretch;
     }
-    
-    .amount {
-        font-size: 2.5rem;
+
+    /* Each card = one full slot */
+    .slider-track .pricing-card {
+        min-width: 100%;
+        flex-shrink: 0;
+        box-sizing: border-box;
+        /* FIX: non-active slides cannot receive clicks */
+        pointer-events: none;
     }
-    
-    .plan-features li {
-        font-size: 0.9rem;
-        min-height: auto;
-        padding: 0.5rem 0;
+
+    /* Only active slide is interactive */
+    .slider-track .pricing-card.slide-active {
+        pointer-events: auto;
     }
-    
-    .cta-content h2 {
-        font-size: 1.75rem;
+
+    /* Reset featured card scale on mobile */
+    .pricing-card.featured {
+        transform: none !important;
     }
-    
-    .cta-content p {
-        font-size: 1rem;
+
+    /* Dot navigation */
+    .slider-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        padding: 1.25rem 0 0.5rem;
     }
-    
-    .cta-buttons {
-        flex-direction: column;
-        width: 100%;
+
+    .slider-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 2px solid var(--primary-color);
+        background: transparent;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease;
+        padding: 0;
     }
-    
-    .cta-buttons .btn {
-        width: 100%;
+
+    .slider-dot.active {
+        background: var(--primary-color);
+        transform: scale(1.3);
     }
     
     .footer-content {
         grid-template-columns: 1fr;
-        gap: 2rem;
     }
     
     .footer-bottom {
@@ -1187,157 +1184,7 @@ p {
         text-align: center;
     }
     
-    .footer-links {
+    .cta-buttons {
         flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .faq-question span {
-        font-size: 1rem;
-    }
-    
-    .faq-answer p {
-        font-size: 0.95rem;
     }
 }
-
-@media (max-width: 480px) {
-    h1 { font-size: 1.75rem; }
-    h2 { font-size: 1.5rem; }
-    
-    .hero-title {
-        font-size: 1.75rem;
-    }
-    
-    .amount {
-        font-size: 2rem;
-    }
-    
-    .btn {
-        padding: 0.75rem 1.5rem;
-        font-size: 0.95rem;
-    }
-    
-    .feature-icon,
-    .step-icon {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .feature-icon i,
-    .step-icon i {
-        font-size: 1.5rem;
-    }
-    
-    .pricing-card {
-        padding: 1.5rem;
-    }
-    
-    .plan-header {
-        min-height: auto;
-    }
-    
-    .pricing-card-slide {
-        flex: 0 0 90%;
-    }
-}
-
-/* Desktop: Hide slider elements */
-@media (min-width: 769px) {
-    .pricing-slider-wrapper {
-        display: none;
-    }
-    
-    .slider-dots,
-    .slider-arrow {
-        display: none;
-    }
-}
-
-/* Disclaimer Modal */
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-}
-
-.modal-content {
-    background: white;
-    border-radius: var(--border-radius);
-    padding: 2.5rem;
-    max-width: 600px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.modal-body ul {
-    padding-left: 1.5rem;
-    margin: 1rem 0;
-}
-
-.modal-body li {
-    margin-bottom: 0.5rem;
-    color: var(--text-dark);
-}
-
-.checkbox-container {
-    margin: 1.5rem 0;
-    display: flex;
-    gap: 0.75rem;
-    align-items: flex-start;
-}
-
-.checkbox-container input {
-    margin-top: 0.25rem;
-    flex-shrink: 0;
-}
-
-.modal-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-}
-
-/* Mobile slider */
-    .plan-category.active {
-        display: block;
-        overflow: hidden;
-    }
-
-    .slider-track {
-        display: flex;
-        transition: transform 0.35s ease;
-        will-change: transform;
-    }
-
-    .slider-track .pricing-card {
-        min-width: 100%;
-        flex-shrink: 0;
-        box-sizing: border-box;
-    }
-
-    .slider-dots {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 1.25rem;
-    }
-
-    .slider-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #d1d5db;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    .slider-dot.active {
-        background: var(--primary-color);
-    }
