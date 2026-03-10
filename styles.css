@@ -1094,6 +1094,73 @@ p {
     }
 
     /* ===========================
+       Mobile Compact Pricing Cards
+       =========================== */
+    .pricing-card {
+        padding: 1.25rem;
+    }
+
+    .plan-header {
+        min-height: auto;
+    }
+
+    .plan-header h3 {
+        font-size: 1.35rem;
+        min-height: auto;
+        margin-bottom: 0.25rem;
+    }
+
+    .plan-header p {
+        font-size: 0.8rem;
+        min-height: auto;
+    }
+
+    .plan-price {
+        margin: 1rem 0;
+        min-height: auto;
+    }
+
+    .amount {
+        font-size: 2.25rem;
+    }
+
+    .currency {
+        font-size: 1.15rem;
+    }
+
+    .price-billing {
+        font-size: 0.8rem;
+    }
+
+    .plan-badge {
+        font-size: 0.85rem;
+        padding: 0.35rem 1rem;
+        min-height: auto;
+    }
+
+    .plan-features {
+        margin-bottom: 1.25rem;
+    }
+
+    .plan-features li {
+        padding: 0.5rem 0;
+        font-size: 0.875rem;
+        min-height: auto;
+        gap: 0.5rem;
+    }
+
+    .pricing-card .btn {
+        padding: 0.7rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .featured-badge {
+        font-size: 0.8rem;
+        padding: 0.35rem 1.15rem;
+        top: -12px;
+    }
+
+    /* ===========================
        Mobile Pricing Slider
        =========================== */
 
