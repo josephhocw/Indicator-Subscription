@@ -225,8 +225,9 @@ if (agreeCheckbox) {
 if (proceedBtn) {
     proceedBtn.addEventListener('click', () => {
         if (agreeCheckbox && agreeCheckbox.checked && pendingStripeUrl) {
+            const url = pendingStripeUrl;
             closeDisclaimerModal();
-            window.open(pendingStripeUrl, '_blank', 'noopener,noreferrer');
+            window.open(url, '_blank', 'noopener,noreferrer');
         }
     });
 }
