@@ -24,7 +24,7 @@ function getSheets() {
 }
 
 const SHEET_ID = () => process.env.GOOGLE_SHEET_ID!;
-const SHEET_NAME = "Sheet1";
+const SHEET_NAME = "TestSheet"; //Demo sheet name, change as needed
 
 export async function appendSubscriber(data: SubscriberData): Promise<void> {
   const sheets = getSheets();
