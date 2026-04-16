@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
 import { appendSubscriber, updateStatusByCustomerId } from "../lib/sheets.js";
-import { sendOnboardingEmail } from "../lib/email.js";
+import { sendOnboardingEmail, type OnboardingEmailData } from "../lib/email.js";
 import { notifyAdmin } from "../lib/telegram.js";
 import { getPlanType, getPlanDisplayName } from "../lib/plans.js";
 
@@ -133,7 +133,14 @@ async function handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
       stripeCustomerId: customerId,
     }),
 
-    sendOnboardingEmail(email, name, planType),
+    sendOnboardingEmail({
+      email,
+      name,
+      planType,
+      tvUsername,
+      telegramUsername: tgUsername,
+      billingEndDate: formatDisplayDateSGT(subscription.current_period_end),
+    }),
 
     notifyAdmin(
       [
@@ -205,6 +212,7 @@ function parseCustomFields(
 
 /**
  * Format a Unix timestamp as YYYY-MM-DD in Singapore timezone (GMT+8).
+ * Used for Google Sheet columns.
  */
 function formatDateSGT(unixSeconds: number): string {
   const date = new Date(unixSeconds * 1000);
@@ -216,4 +224,28 @@ function formatDateSGT(unixSeconds: number): string {
   });
   // en-CA locale gives YYYY-MM-DD format
   return formatter.format(date);
+}
+
+/**
+ * Format a Unix timestamp as "16 April 2026 14:30" in Singapore timezone.
+ * Used for human-readable display in emails.
+ */
+function formatDisplayDateSGT(unixSeconds: number): string {
+  const date = new Date(unixSeconds * 1000);
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Singapore",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(date);
+  const day = parts.find((p) => p.type === "day")!.value;
+  const month = parts.find((p) => p.type === "month")!.value;
+  const year = parts.find((p) => p.type === "year")!.value;
+  const hour = parts.find((p) => p.type === "hour")!.value;
+  const minute = parts.find((p) => p.type === "minute")!.value;
+  return `${day} ${month} ${year} ${hour}:${minute}`;
 }
