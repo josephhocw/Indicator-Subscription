@@ -108,13 +108,20 @@ async function handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
     limit: 1,
   });
   const session = sessions.data[0];
+  // Log custom field keys for debugging
+  console.log(
+    "Checkout custom_fields:",
+    JSON.stringify(session?.custom_fields?.map((f) => ({ key: f.key, value: f.text?.value })))
+  );
   const { tvUsername, tgUsername } = parseCustomFields(session);
 
   // Calculate dates in Singapore timezone (GMT+8), ISO format for sheet
   const startDate = formatDateSGT(subscription.start_date);
-  const expiryDate = subscription.current_period_end
-    ? formatDateSGT(subscription.current_period_end)
-    : "";
+
+  // Get billing period end — use current_period_end, fall back to calculating from interval
+  const periodEnd = subscription.current_period_end
+    || calculatePeriodEnd(subscription);
+  const expiryDate = periodEnd ? formatDateSGT(periodEnd) : startDate;
 
   const name = customer.name || customer.email || "Unknown";
   const email = customer.email || "";
@@ -139,7 +146,9 @@ async function handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
       planType,
       tvUsername,
       telegramUsername: tgUsername,
-      billingEndDate: formatDisplayDateSGT(subscription.current_period_end),
+      billingEndDate: periodEnd
+        ? formatDisplayDateSGT(periodEnd)
+        : "See Stripe billing portal",
     }),
 
     notifyAdmin(
@@ -208,6 +217,34 @@ function parseCustomFields(
     tvUsername: parts[0]?.trim() || "",
     tgUsername: parts[1]?.trim() || "",
   };
+}
+
+/**
+ * Fallback: calculate period end from subscription interval if current_period_end is missing.
+ */
+function calculatePeriodEnd(subscription: Stripe.Subscription): number | null {
+  const item = subscription.items?.data?.[0];
+  if (!item?.price?.recurring) return null;
+
+  const { interval, interval_count } = item.price.recurring;
+  const start = new Date(subscription.start_date * 1000);
+
+  switch (interval) {
+    case "day":
+      start.setDate(start.getDate() + interval_count);
+      break;
+    case "week":
+      start.setDate(start.getDate() + interval_count * 7);
+      break;
+    case "month":
+      start.setMonth(start.getMonth() + interval_count);
+      break;
+    case "year":
+      start.setFullYear(start.getFullYear() + interval_count);
+      break;
+  }
+
+  return Math.floor(start.getTime() / 1000);
 }
 
 /**

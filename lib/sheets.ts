@@ -45,7 +45,7 @@ export async function appendSubscriber(data: SubscriberData): Promise<void> {
           data.subscriptionExpiry,   // H - Subscription Expiry
           "ACTIVE",                  // I - Status
           data.stripeCustomerId,     // J - Stripe Customer ID
-          "",                        // K - Previous Plan Type
+          "NO",                       // K - Previous Plan Type
           "0",                       // L - Renewal Count
         ],
       ],
