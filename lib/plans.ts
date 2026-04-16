@@ -1,6 +1,7 @@
 const PRICE_TO_PLAN: Record<string, string> = {
-  // TODO: Remove test price ID after verification
+  // TODO: Remove test price IDs after verification
   "price_1TMm8pPApeZiCPK2CuqCZUFa": "FXMC",
+  "price_1SNaZXPApeZiCPK2PZkjTiz3": "FXMC",
   "price_1SOPI8PApeZiCPK2Z9OMozyV": "FXMC",
   "price_1SOPIPPApeZiCPK2hrXFzaK3": "SG",
   "price_1SOPIUPApeZiCPK2wSCEaEC3": "HK",
