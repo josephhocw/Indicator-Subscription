@@ -108,20 +108,15 @@ async function handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
     limit: 1,
   });
   const session = sessions.data[0];
-  // Log custom field keys for debugging
-  console.log(
-    "Checkout custom_fields:",
-    JSON.stringify(session?.custom_fields?.map((f) => ({ key: f.key, value: f.text?.value })))
-  );
   const { tvUsername, tgUsername } = parseCustomFields(session);
 
-  // Calculate dates in Singapore timezone (GMT+8), ISO format for sheet
-  const startDate = formatDateSGT(subscription.start_date);
+  // Calculate dates in Singapore timezone (GMT+8)
+  const startDate = formatDisplayDateSGT(subscription.start_date);
 
   // Get billing period end — use current_period_end, fall back to calculating from interval
   const periodEnd = subscription.current_period_end
     || calculatePeriodEnd(subscription);
-  const expiryDate = periodEnd ? formatDateSGT(periodEnd) : startDate;
+  const expiryDate = periodEnd ? formatDisplayDateSGT(periodEnd) : startDate;
 
   const name = customer.name || customer.email || "Unknown";
   const email = customer.email || "";
@@ -146,9 +141,7 @@ async function handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
       planType,
       tvUsername,
       telegramUsername: tgUsername,
-      billingEndDate: periodEnd
-        ? formatDisplayDateSGT(periodEnd)
-        : "See Stripe billing portal",
+      billingEndDate: expiryDate,
     }),
 
     notifyAdmin(
@@ -200,8 +193,9 @@ function parseCustomFields(
   const fields = session.custom_fields;
 
   // Try separate named fields first
-  const tvField = fields.find((f) => f.key === "tradingview_username");
-  const tgField = fields.find((f) => f.key === "telegram_username");
+  // Stripe generates keys by lowercasing labels and removing spaces/special chars
+  const tvField = fields.find((f) => f.key.includes("tradingview"));
+  const tgField = fields.find((f) => f.key.includes("telegram"));
 
   if (tvField || tgField) {
     return {
@@ -248,24 +242,8 @@ function calculatePeriodEnd(subscription: Stripe.Subscription): number | null {
 }
 
 /**
- * Format a Unix timestamp as YYYY-MM-DD in Singapore timezone (GMT+8).
- * Used for Google Sheet columns.
- */
-function formatDateSGT(unixSeconds: number): string {
-  const date = new Date(unixSeconds * 1000);
-  const formatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Singapore",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  // en-CA locale gives YYYY-MM-DD format
-  return formatter.format(date);
-}
-
-/**
- * Format a Unix timestamp as "16 April 2026 14:30" in Singapore timezone.
- * Used for human-readable display in emails.
+ * Format a Unix timestamp as "16 April 2026 18:00" in Singapore timezone (GMT+8).
+ * Used for both Google Sheet and email display.
  */
 function formatDisplayDateSGT(unixSeconds: number): string {
   const date = new Date(unixSeconds * 1000);
