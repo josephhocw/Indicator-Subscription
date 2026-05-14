@@ -1,15 +1,12 @@
 const PRICE_TO_PLAN: Record<string, string> = {
-  // TODO: Remove test price IDs after verification
-  "price_1TMm8pPApeZiCPK2CuqCZUFa": "FXMC",
+  "price_1SNb2pPApeZiCPK2uIln7piV": "SG",
   "price_1SNaZXPApeZiCPK2PZkjTiz3": "FXMC",
-  "price_1SOPI8PApeZiCPK2Z9OMozyV": "FXMC",
-  "price_1SOPIPPApeZiCPK2hrXFzaK3": "SG",
-  "price_1SOPIUPApeZiCPK2wSCEaEC3": "HK",
-  "price_1SOPIQPApeZiCPK2B4FlKafO": "US",
-  "price_1SOPIIPApeZiCPK2krxQ55XI": "US_HK",
-  "price_1SOPIwPApeZiCPK2VlNvGRiv": "US_SG_FXMC",
-  "price_1SumwoPApeZiCPK2aBYCsk8E": "HK_SG_FXMC",
-  "price_1SOPISPApeZiCPK26eGgrPH2": "ALL_MARKETS",
+  "price_1SNbFQPApeZiCPK2YcsuDyXc": "HK",
+  "price_1SNb26PApeZiCPK25nSa9j6H": "US",
+  "price_1SNasAPApeZiCPK28bMFFYhP": "US_HK",
+  "price_1SNaqLPApeZiCPK2c7Fcenzl": "US_SG_FXMC",
+  "price_1TRnm7PApeZiCPK2hk54bsUA": "HK_SG_FXMC",
+  "price_1SNau9PApeZiCPK22ZjuVaKQ": "ALL_MARKETS",
 };
 
 export function getPlanType(priceId: string): string {
@@ -44,6 +41,41 @@ export function getPlanDisplayName(planType: string): string {
 
 export function getMarketDisplayName(marketCode: string): string {
   return MARKET_DISPLAY_NAMES[marketCode] || marketCode;
+}
+
+// --- Plan pricing (SGD, quarterly) ---
+// Used to classify plan changes as UPGRADED / DOWNGRADED / PLAN_SWITCH.
+
+const PLAN_PRICE_SGD_QUARTERLY: Record<string, number> = {
+  FXMC: 87,
+  SG: 87,
+  HK: 147,
+  US: 147,
+  US_HK: 264,
+  US_SG_FXMC: 264,
+  HK_SG_FXMC: 264,
+  ALL_MARKETS: 388,
+};
+
+export function getPlanPriceSGD(planType: string): number {
+  const price = PLAN_PRICE_SGD_QUARTERLY[planType];
+  if (price === undefined) {
+    throw new Error(`No price configured for plan: ${planType}`);
+  }
+  return price;
+}
+
+export type PlanChangeAction = "UPGRADED" | "DOWNGRADED" | "PLAN_SWITCH";
+
+export function classifyPlanChange(
+  oldPlanType: string,
+  newPlanType: string
+): PlanChangeAction {
+  const oldPrice = getPlanPriceSGD(oldPlanType);
+  const newPrice = getPlanPriceSGD(newPlanType);
+  if (newPrice > oldPrice) return "UPGRADED";
+  if (newPrice < oldPrice) return "DOWNGRADED";
+  return "PLAN_SWITCH";
 }
 
 // --- Plan category & markets ---
@@ -103,3 +135,7 @@ export function getMarketLinks(planType: string): MarketLink[] {
 export const MAIN_CHANNEL_LINK = "https://t.me/+k7DOWyTCSFBiMmU1";
 export const BILLING_PORTAL_LINK =
   "https://billing.stripe.com/p/login/14A28tfhi79h9Mhfgk4ow00";
+
+// Placeholder — replace with real reactivate-subscription URL when ready.
+export const UNDO_CANCELLATION_LINK =
+  process.env.UNDO_CANCELLATION_LINK || "https://example.com/undo-cancellation";

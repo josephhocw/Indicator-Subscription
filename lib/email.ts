@@ -5,10 +5,31 @@ import {
   parsePlanType,
   MAIN_CHANNEL_LINK,
   BILLING_PORTAL_LINK,
+  UNDO_CANCELLATION_LINK,
   type MarketLink,
 } from "./plans.js";
 
 const resend = () => new Resend(process.env.RESEND_API_KEY!);
+
+// --- Shared helpers ---
+
+function sendEmail(opts: {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}): Promise<unknown> {
+  return resend().emails.send({
+    from: process.env.FROM_EMAIL!,
+    to: opts.to,
+    bcc: process.env.BCC_EMAIL,
+    subject: opts.subject,
+    html: opts.html,
+    text: opts.text,
+  });
+}
+
+// --- Onboarding email (new subscribers + reactivations) ---
 
 export interface OnboardingEmailData {
   email: string;
@@ -187,17 +208,225 @@ Happy Trading!
 Need help? Contact @Joseph_Ho on Telegram
 RHO Market Navigator | Trading Signals Service`;
 
-  await resend().emails.send({
-    from: process.env.FROM_EMAIL!,
+  await sendEmail({
     to: email,
-    bcc: process.env.BCC_EMAIL,
     subject: `Welcome to RHO Navigator - ${planName}`,
     html,
     text,
   });
 }
 
-// --- Telegram button HTML generators ---
+// --- Payment failed email ---
+
+export interface PaymentFailedEmailData {
+  email: string;
+  name: string;
+  planType: string;
+  attemptCount: number;
+  nextAttemptDate?: string; // optional formatted date for next retry
+}
+
+export async function sendPaymentFailedEmail(
+  data: PaymentFailedEmailData
+): Promise<void> {
+  const { email, name, planType, attemptCount, nextAttemptDate } = data;
+  const planName = getPlanDisplayName(planType);
+  const attemptLine = attemptCount > 1
+    ? `This was attempt ${attemptCount}. Stripe will keep retrying for a few days.`
+    : `Stripe will retry automatically over the next few days.`;
+  const retryLine = nextAttemptDate
+    ? `Next retry: ${nextAttemptDate}.`
+    : "";
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment failed</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f4f4;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td align="center" style="padding: 20px 0;">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 8px;">
+
+                    <tr>
+                        <td style="padding: 30px 30px 10px 30px; text-align: center;">
+                            <h1 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 24px; font-weight: normal;">Payment failed</h1>
+                            <p style="margin: 0; color: #666; font-size: 16px;">Hi ${name},</p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 10px 30px 20px 30px;">
+                            <p style="margin: 0 0 12px 0; color: #666; font-size: 15px; line-height: 1.6;">
+                                Your latest payment for the <strong>${planName}</strong> plan did not go through.
+                            </p>
+                            <p style="margin: 0 0 12px 0; color: #666; font-size: 15px; line-height: 1.6;">
+                                ${attemptLine} ${retryLine}
+                            </p>
+                            <p style="margin: 0 0 20px 0; color: #666; font-size: 15px; line-height: 1.6;">
+                                To avoid losing access, please update your card details now.
+                            </p>
+
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto;">
+                                <tr>
+                                    <td style="border-radius: 5px; background-color: #FF9800;">
+                                        <a href="${BILLING_PORTAL_LINK}" target="_blank" style="display: block; padding: 12px 24px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: bold; text-align: center;">Update Payment Method</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 20px 30px;">
+                            <div style="padding: 12px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                                <p style="margin: 0; color: #666; font-size: 13px;">If the retries all fail, your subscription will be cancelled and you will lose access to the Telegram groups and the indicator.</p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 30px; text-align: center; border-top: 2px solid #e0e0e0;">
+                            <p style="margin: 0; color: #999; font-size: 13px;">Need help? Reply to this email or message <a href="https://t.me/Joseph_Ho" style="color: #0088cc; text-decoration: none;">@Joseph_Ho</a> on Telegram.</p>
+                            <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">RHO Market Navigator | Trading Signals Service</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+
+  const text = `Payment failed
+
+Hi ${name},
+
+Your latest payment for the ${planName} plan did not go through.
+${attemptLine} ${retryLine}
+
+To avoid losing access, please update your card details now:
+${BILLING_PORTAL_LINK}
+
+If the retries all fail, your subscription will be cancelled and you will lose access to the Telegram groups and the indicator.
+
+Need help? Reply to this email or message @Joseph_Ho on Telegram.
+RHO Market Navigator | Trading Signals Service`;
+
+  await sendEmail({
+    to: email,
+    subject: `Payment failed for your RHO Navigator subscription`,
+    html,
+    text,
+  });
+}
+
+// --- Cancellation confirmation email ---
+
+export interface CancellationEmailData {
+  email: string;
+  name: string;
+  planType: string;
+  accessEndDate: string; // formatted display date
+}
+
+export async function sendCancellationConfirmationEmail(
+  data: CancellationEmailData
+): Promise<void> {
+  const { email, name, planType, accessEndDate } = data;
+  const planName = getPlanDisplayName(planType);
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your subscription is set to cancel</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f4f4;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td align="center" style="padding: 20px 0;">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 8px;">
+
+                    <tr>
+                        <td style="padding: 30px 30px 10px 30px; text-align: center;">
+                            <h1 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 24px; font-weight: normal;">Your subscription is set to cancel</h1>
+                            <p style="margin: 0; color: #666; font-size: 16px;">Hi ${name},</p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 10px 30px 20px 30px;">
+                            <p style="margin: 0 0 12px 0; color: #666; font-size: 15px; line-height: 1.6;">
+                                We have received your cancellation request for the <strong>${planName}</strong> plan.
+                            </p>
+                            <p style="margin: 0 0 12px 0; color: #666; font-size: 15px; line-height: 1.6;">
+                                Your subscription stays active until <strong>${accessEndDate}</strong>. After that, access to the Telegram groups and the indicator ends.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 0 30px 20px 30px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8f9fa; border-radius: 6px; border-left: 4px solid #4CAF50;">
+                                <tr>
+                                    <td style="padding: 20px; text-align: center;">
+                                        <p style="margin: 0 0 12px 0; color: #2c3e50; font-size: 15px; font-weight: bold;">Changed your mind?</p>
+                                        <p style="margin: 0 0 16px 0; color: #666; font-size: 14px; line-height: 1.6;">You can undo the cancellation any time before ${accessEndDate} and keep your subscription running.</p>
+                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto;">
+                                            <tr>
+                                                <td style="border-radius: 5px; background-color: #4CAF50;">
+                                                    <a href="${UNDO_CANCELLATION_LINK}" target="_blank" style="display: block; padding: 12px 24px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: bold; text-align: center;">Undo Cancellation</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 30px; text-align: center; border-top: 2px solid #e0e0e0;">
+                            <p style="margin: 0; color: #999; font-size: 13px;">Need help? Reply to this email or message <a href="https://t.me/Joseph_Ho" style="color: #0088cc; text-decoration: none;">@Joseph_Ho</a> on Telegram.</p>
+                            <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">RHO Market Navigator | Trading Signals Service</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+
+  const text = `Your subscription is set to cancel
+
+Hi ${name},
+
+We have received your cancellation request for the ${planName} plan.
+Your subscription stays active until ${accessEndDate}. After that, access to the Telegram groups and the indicator ends.
+
+Changed your mind? You can undo the cancellation any time before ${accessEndDate} and keep your subscription running:
+${UNDO_CANCELLATION_LINK}
+
+Need help? Reply to this email or message @Joseph_Ho on Telegram.
+RHO Market Navigator | Trading Signals Service`;
+
+  await sendEmail({
+    to: email,
+    subject: `Your RHO Navigator subscription is set to cancel`,
+    html,
+    text,
+  });
+}
+
+// --- Telegram button HTML generators (used by onboarding email) ---
 
 function generateTelegramButtons(
   markets: MarketLink[],
