@@ -1,14 +1,12 @@
 const PRICE_TO_PLAN: Record<string, string> = {
   // TODO: Remove test price IDs after verification
-  "price_1TMm8pPApeZiCPK2CuqCZUFa": "FXMC",
   "price_1SNaZXPApeZiCPK2PZkjTiz3": "FXMC",
-  "price_1SOPI8PApeZiCPK2Z9OMozyV": "FXMC",
-  "price_1SOPIPPApeZiCPK2hrXFzaK3": "SG",
-  "price_1SOPIUPApeZiCPK2wSCEaEC3": "HK",
-  "price_1SOPIQPApeZiCPK2B4FlKafO": "US",
-  "price_1SOPIIPApeZiCPK2krxQ55XI": "US_HK",
-  "price_1SOPIwPApeZiCPK2VlNvGRiv": "US_SG_FXMC",
-  "price_1SumwoPApeZiCPK2aBYCsk8E": "HK_SG_FXMC",
+  "price_1SNb2pPApeZiCPK2uIln7piV": "SG",
+  "price_1SNbFQPApeZiCPK2YcsuDyXc": "HK",
+  "price_1SNb26PApeZiCPK25nSa9j6H": "US",
+  "price_1SNasAPApeZiCPK28bMFFYhP": "US_HK",
+  "price_1SNaqLPApeZiCPK2c7Fcenzl": "US_SG_FXMC",
+  "price_1TRnm7PApeZiCPK2hk54bsUA": "HK_SG_FXMC",
   "price_1SOPISPApeZiCPK26eGgrPH2": "ALL_MARKETS",
 };
 
@@ -16,6 +14,14 @@ export function getPlanType(priceId: string): string {
   const plan = PRICE_TO_PLAN[priceId];
   if (!plan) throw new Error(`Unknown Stripe price ID: ${priceId}`);
   return plan;
+}
+
+const PLAN_TO_PRICE: Record<string, string> = Object.fromEntries(
+  Object.entries(PRICE_TO_PLAN).map(([priceId, plan]) => [plan, priceId])
+);
+
+export function getPriceIdForPlan(planType: string): string | null {
+  return PLAN_TO_PRICE[planType] || null;
 }
 
 // --- Display names ---

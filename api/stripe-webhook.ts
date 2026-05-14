@@ -1,14 +1,23 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
-import { appendSubscriber, updateStatusByCustomerId } from "../lib/sheets.js";
-import { sendOnboardingEmail, type OnboardingEmailData } from "../lib/email.js";
+import {
+  appendSubscriber,
+  findSubscriberRow,
+  findSubscriberByCustomerId,
+  updateSubscriberRow,
+  type ExistingSubscriber,
+  type SubscriberFieldUpdate,
+} from "../lib/sheets.js";
+import { sendOnboardingEmail } from "../lib/email.js";
 import { notifyAdmin } from "../lib/telegram.js";
-import { getPlanType, getPlanDisplayName } from "../lib/plans.js";
+import {
+  getPlanType,
+  getPlanDisplayName,
+  getPriceIdForPlan,
+} from "../lib/plans.js";
 
 const stripe = () => new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-// Vercel must deliver the raw body for Stripe signature verification.
-// Setting this config disables Vercel's automatic JSON parsing.
 export const config = {
   api: { bodyParser: false },
 };
@@ -30,7 +39,6 @@ export default async function handler(
     return;
   }
 
-  // --- Signature verification ---
   const sig = req.headers["stripe-signature"];
   if (!sig) {
     res.status(400).json({ error: "Missing stripe-signature header" });
@@ -52,7 +60,6 @@ export default async function handler(
     return;
   }
 
-  // --- Route by event type ---
   console.log(`Stripe event: ${event.type} | ${event.id}`);
 
   try {
@@ -61,8 +68,16 @@ export default async function handler(
         await handleSubscriptionCreated(event);
         break;
 
+      case "customer.subscription.updated":
+        await handleSubscriptionUpdated(event);
+        break;
+
       case "customer.subscription.deleted":
         await handleSubscriptionDeleted(event);
+        break;
+
+      case "invoice.payment_succeeded":
+        await handleInvoicePaymentSucceeded(event);
         break;
 
       default:
@@ -74,7 +89,6 @@ export default async function handler(
     const message = err instanceof Error ? err.message : String(err);
     console.error(`Error handling ${event.type}:`, message);
 
-    // Notify admin about the failure
     await notifyAdmin(
       `<b>Webhook Error</b>\nEvent: ${event.type}\nID: ${event.id}\nError: ${message}`
     ).catch((telegramErr) =>
@@ -85,44 +99,138 @@ export default async function handler(
   }
 }
 
+// =============================================================================
+// Event 1 — customer.subscription.created
+// =============================================================================
+
 async function handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
   const subscription = event.data.object as Stripe.Subscription;
-  const customerId =
-    typeof subscription.customer === "string"
-      ? subscription.customer
-      : subscription.customer.id;
+  const customerId = getCustomerId(subscription);
 
-  // Get customer details from Stripe
+  // Idempotency: if this exact Stripe customer ID is already in the sheet,
+  // assume this is a Stripe webhook retry and no-op.
+  const existingByCustomer = await findSubscriberByCustomerId(customerId);
+  if (existingByCustomer) {
+    console.log(
+      `Idempotent skip: customer ${customerId} already on row ${existingByCustomer.rowIndex}`
+    );
+    return;
+  }
+
   const customer = await stripe().customers.retrieve(customerId);
   if (customer.deleted) throw new Error(`Customer ${customerId} is deleted`);
 
-  // Get plan type from the first subscription item's price
   const priceId = subscription.items.data[0]?.price.id;
   if (!priceId) throw new Error("No price ID found on subscription");
   const planType = getPlanType(priceId);
+  const planName = getPlanDisplayName(planType);
 
-  // Extract custom fields (TradingView & Telegram usernames)
-  // Stripe Checkout stores these on the session, not the subscription.
-  const sessions = await stripe().checkout.sessions.list({
-    subscription: subscription.id,
-    limit: 1,
-  });
-  const session = sessions.data[0];
+  const session = await getCheckoutSession(subscription.id);
   const { tvUsername, tgUsername } = parseCustomFields(session);
 
-  // Calculate dates in Singapore timezone (GMT+8)
   const startDate = formatDisplayDateSGT(subscription.start_date);
-
-  // Get billing period end — use current_period_end, fall back to calculating from interval
-  const periodEnd = subscription.current_period_end
-    || calculatePeriodEnd(subscription);
+  const periodEnd =
+    subscription.current_period_end || calculatePeriodEnd(subscription);
   const expiryDate = periodEnd ? formatDisplayDateSGT(periodEnd) : startDate;
 
   const name = customer.name || customer.email || "Unknown";
   const email = customer.email || "";
-  const planName = getPlanDisplayName(planType);
 
-  // Run all three actions concurrently
+  // Look for an existing subscriber matching by email / TV / Telegram username.
+  const existing = await findSubscriberRow({
+    email,
+    tvUsername,
+    tgUsername,
+  });
+
+  if (existing && existing.status === "ACTIVE") {
+    // Identity collision with an active row — append a new row but flag it.
+    await appendNewSubscriber({
+      email,
+      name,
+      tvUsername,
+      tgUsername,
+      planType,
+      planName,
+      customerId,
+      startDate,
+      expiryDate,
+      duplicateWarning: buildDuplicateWarning(existing, {
+        email,
+        tvUsername,
+        tgUsername,
+      }),
+    });
+    return;
+  }
+
+  if (existing) {
+    // Returning subscriber: merge into their old row.
+    await mergeReturningSubscriber({
+      existing,
+      email,
+      name,
+      tvUsername,
+      tgUsername,
+      planType,
+      planName,
+      customerId,
+      startDate,
+      expiryDate,
+    });
+    return;
+  }
+
+  // True new subscriber.
+  await appendNewSubscriber({
+    email,
+    name,
+    tvUsername,
+    tgUsername,
+    planType,
+    planName,
+    customerId,
+    startDate,
+    expiryDate,
+  });
+}
+
+interface NewSubscriberArgs {
+  email: string;
+  name: string;
+  tvUsername: string;
+  tgUsername: string;
+  planType: string;
+  planName: string;
+  customerId: string;
+  startDate: string;
+  expiryDate: string;
+  duplicateWarning?: string;
+}
+
+async function appendNewSubscriber(args: NewSubscriberArgs): Promise<void> {
+  const {
+    email,
+    name,
+    tvUsername,
+    tgUsername,
+    planType,
+    planName,
+    customerId,
+    startDate,
+    expiryDate,
+    duplicateWarning,
+  } = args;
+
+  const notificationLines = [
+    `<b>🆕 NEW SUBSCRIPTION</b>`,
+    `Name: ${name} | Plan: ${planName} (${planType})`,
+    `TradingView: ${tvUsername || "(not provided)"} | Telegram: @${tgUsername || "(not provided)"}`,
+    `Start: ${startDate} → Expiry: ${expiryDate}`,
+    `⚡ Action: Grant TradingView access`,
+  ];
+  if (duplicateWarning) notificationLines.push(duplicateWarning);
+
   await Promise.all([
     appendSubscriber({
       email,
@@ -134,7 +242,6 @@ async function handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
       subscriptionExpiry: expiryDate,
       stripeCustomerId: customerId,
     }),
-
     sendOnboardingEmail({
       email,
       name,
@@ -143,46 +250,391 @@ async function handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
       telegramUsername: tgUsername,
       billingEndDate: expiryDate,
     }),
-
-    notifyAdmin(
-      [
-        `<b>New Subscriber</b>`,
-        `Plan: ${planName} (${planType})`,
-        `Name: ${name}`,
-        `Email: ${email}`,
-        `TradingView: ${tvUsername || "(not provided)"}`,
-        `Telegram: ${tgUsername || "(not provided)"}`,
-        `Stripe: ${customerId}`,
-      ].join("\n")
-    ),
+    notifyAdmin(notificationLines.join("\n")),
   ]);
 
-  console.log(`Processed subscription.created for ${customerId} (${planType})`);
+  console.log(`Appended new subscriber for ${customerId} (${planType})`);
 }
+
+interface MergeArgs {
+  existing: ExistingSubscriber;
+  email: string;
+  name: string;
+  tvUsername: string;
+  tgUsername: string;
+  planType: string;
+  planName: string;
+  customerId: string;
+  startDate: string;
+  expiryDate: string;
+}
+
+async function mergeReturningSubscriber(args: MergeArgs): Promise<void> {
+  const {
+    existing,
+    email,
+    name,
+    tvUsername,
+    tgUsername,
+    planType,
+    planName,
+    customerId,
+    startDate,
+    expiryDate,
+  } = args;
+
+  const oldPlan = existing.planType;
+  const planChanged = oldPlan && oldPlan !== planType;
+
+  const updates: SubscriberFieldUpdate = {
+    email,
+    customerName: name,
+    tradingViewUsername: tvUsername,
+    telegramUsername: tgUsername,
+    planType,
+    subscriptionStart: startDate,
+    subscriptionExpiry: expiryDate,
+    status: "ACTIVE",
+    stripeCustomerId: customerId,
+    renewalCount: String(parseRenewalCount(existing.renewalCount) + 1),
+  };
+
+  let changeType = "";
+  if (planChanged) {
+    updates.previousPlanType = oldPlan;
+    changeType = await determineChangeType(existing, planType);
+    updates.changeType = changeType;
+  } else {
+    updates.previousPlanType = "";
+    updates.changeType = "";
+  }
+
+  const notificationLines = [
+    `<b>🔁 RETURNING SUBSCRIBER</b>`,
+    `Name: ${name} | Plan: ${planName} (${planType})`,
+    `TradingView: ${tvUsername || "(not provided)"} | Telegram: @${tgUsername || "(not provided)"}`,
+    `Start: ${startDate} → Expiry: ${expiryDate}`,
+    `Previous status: ${existing.status || "(unknown)"} | Renewal #: ${updates.renewalCount}`,
+  ];
+  if (planChanged) {
+    notificationLines.push(`Plan change: ${oldPlan} → ${planType} (${changeType})`);
+  }
+  notificationLines.push(`⚡ Action: Grant TradingView access`);
+
+  await Promise.all([
+    updateSubscriberRow(existing.rowIndex, updates),
+    sendOnboardingEmail({
+      email,
+      name,
+      planType,
+      tvUsername,
+      telegramUsername: tgUsername,
+      billingEndDate: expiryDate,
+    }),
+    notifyAdmin(notificationLines.join("\n")),
+  ]);
+
+  console.log(
+    `Merged returning subscriber on row ${existing.rowIndex} for ${customerId} (${planType})`
+  );
+}
+
+function buildDuplicateWarning(
+  existing: ExistingSubscriber,
+  candidate: { email: string; tvUsername: string; tgUsername: string }
+): string {
+  const matchedFields: string[] = [];
+  const eq = (a: string, b: string) =>
+    a.trim().toLowerCase() === b.trim().toLowerCase();
+  if (candidate.email && eq(existing.email, candidate.email)) {
+    matchedFields.push("email");
+  }
+  if (
+    candidate.tvUsername &&
+    eq(existing.tradingViewUsername, candidate.tvUsername)
+  ) {
+    matchedFields.push("TradingView username");
+  }
+  if (
+    candidate.tgUsername &&
+    eq(existing.telegramUsername, candidate.tgUsername)
+  ) {
+    matchedFields.push("Telegram username");
+  }
+  const fields = matchedFields.join(", ") || "identity";
+  return `⚠️ DUPLICATE IDENTITY: ${fields} matches existing ACTIVE row #${existing.rowIndex} (${existing.stripeCustomerId})`;
+}
+
+// =============================================================================
+// Events 2 + 4 — customer.subscription.updated
+// =============================================================================
+
+async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
+  const subscription = event.data.object as Stripe.Subscription;
+  const previousAttributes = (event.data.previous_attributes || {}) as Partial<
+    Stripe.Subscription
+  > & { items?: { data?: Array<{ price?: { id?: string } }> } };
+
+  const newPriceId = subscription.items.data[0]?.price.id;
+  const oldPriceId = previousAttributes.items?.data?.[0]?.price?.id;
+
+  // Priority 1: plan change
+  if (newPriceId && oldPriceId && newPriceId !== oldPriceId) {
+    await handlePlanChange(subscription, oldPriceId, newPriceId);
+    return;
+  }
+
+  // Priority 2: cancel-at-period-end flipped false → true
+  const previousCancelFlag = previousAttributes.cancel_at_period_end;
+  if (
+    previousCancelFlag === false &&
+    subscription.cancel_at_period_end === true
+  ) {
+    await handleCancellationRequested(subscription);
+    return;
+  }
+
+  console.log(
+    `subscription.updated ignored (no plan change or cancellation request) | ${subscription.id}`
+  );
+}
+
+async function handlePlanChange(
+  subscription: Stripe.Subscription,
+  oldPriceId: string,
+  newPriceId: string
+): Promise<void> {
+  const customerId = getCustomerId(subscription);
+  const existing = await findSubscriberByCustomerId(customerId);
+  if (!existing) {
+    throw new Error(`Plan change for unknown customer ${customerId}`);
+  }
+
+  const newPlanType = getPlanType(newPriceId);
+  const oldPlanType = safeGetPlanType(oldPriceId) || existing.planType;
+
+  // Fetch unit_amounts from Stripe to compare quarterly cost.
+  const [oldPrice, newPrice] = await Promise.all([
+    stripe().prices.retrieve(oldPriceId),
+    stripe().prices.retrieve(newPriceId),
+  ]);
+  const oldAmount = oldPrice.unit_amount ?? 0;
+  const newAmount = newPrice.unit_amount ?? 0;
+  const changeType =
+    newAmount > oldAmount
+      ? "Upgraded"
+      : newAmount < oldAmount
+      ? "Downgraded"
+      : "Switched Plan";
+
+  await updateSubscriberRow(existing.rowIndex, {
+    previousPlanType: oldPlanType,
+    planType: newPlanType,
+    changeType,
+  });
+
+  await notifyAdmin(
+    [
+      `<b>🔄 PLAN CHANGED — ${changeType}</b>`,
+      `Name: ${existing.customerName}`,
+      `TradingView: ${existing.tradingViewUsername || "(not provided)"} | Telegram: @${existing.telegramUsername || "(not provided)"}`,
+      `Change: ${oldPlanType} → ${newPlanType}`,
+      `⚡ Action: Update TradingView access (remove old script, grant new)`,
+    ].join("\n")
+  );
+
+  console.log(
+    `Plan change on row ${existing.rowIndex}: ${oldPlanType} → ${newPlanType} (${changeType})`
+  );
+}
+
+async function handleCancellationRequested(
+  subscription: Stripe.Subscription
+): Promise<void> {
+  const customerId = getCustomerId(subscription);
+  const existing = await findSubscriberByCustomerId(customerId);
+  if (!existing) {
+    throw new Error(`Cancellation requested for unknown customer ${customerId}`);
+  }
+
+  const periodEnd =
+    subscription.current_period_end || calculatePeriodEnd(subscription);
+  const expiryDate = periodEnd
+    ? formatDisplayDateSGT(periodEnd)
+    : existing.subscriptionExpiry;
+
+  await notifyAdmin(
+    [
+      `<b>⚠️ CANCELLATION REQUESTED</b>`,
+      `Name: ${existing.customerName} | Plan: ${getPlanDisplayName(existing.planType)} (${existing.planType})`,
+      `TradingView: ${existing.tradingViewUsername || "(not provided)"} | Telegram: @${existing.telegramUsername || "(not provided)"}`,
+      `Start: ${existing.subscriptionStart} → Expiry: ${expiryDate}`,
+      `ℹ️ Access continues until expiry`,
+    ].join("\n")
+  );
+
+  console.log(`Cancellation requested for ${customerId} (row ${existing.rowIndex})`);
+}
+
+// =============================================================================
+// Event 3 — customer.subscription.deleted
+// =============================================================================
 
 async function handleSubscriptionDeleted(event: Stripe.Event): Promise<void> {
   const subscription = event.data.object as Stripe.Subscription;
-  const customerId =
-    typeof subscription.customer === "string"
-      ? subscription.customer
-      : subscription.customer.id;
+  const customerId = getCustomerId(subscription);
 
-  await Promise.all([
-    updateStatusByCustomerId(customerId, "CANCELLED"),
-    notifyAdmin(`<b>Subscription Cancelled</b>\nCustomer: ${customerId}`),
-  ]);
+  const existing = await findSubscriberByCustomerId(customerId);
+  if (!existing) {
+    // Update would have failed anyway — log and notify.
+    await notifyAdmin(
+      `<b>🔴 SUBSCRIPTION EXPIRED</b>\nCustomer ${customerId} not found in sheet — manual cleanup needed.`
+    );
+    console.warn(`subscription.deleted for unknown customer ${customerId}`);
+    return;
+  }
 
-  console.log(`Processed subscription.deleted for ${customerId}`);
+  await updateSubscriberRow(existing.rowIndex, { status: "CANCELLED" });
+
+  await notifyAdmin(
+    [
+      `<b>🔴 SUBSCRIPTION EXPIRED</b>`,
+      `Name: ${existing.customerName} | Plan: ${getPlanDisplayName(existing.planType)} (${existing.planType})`,
+      `TradingView: ${existing.tradingViewUsername || "(not provided)"} | Telegram: @${existing.telegramUsername || "(not provided)"}`,
+      `Start: ${existing.subscriptionStart} → Expiry: ${existing.subscriptionExpiry}`,
+      `⚡ Action: Remove TradingView access`,
+    ].join("\n")
+  );
+
+  console.log(`subscription.deleted processed for ${customerId} (row ${existing.rowIndex})`);
 }
 
-// --- Helpers ---
+// =============================================================================
+// Event 5 — invoice.payment_succeeded (renewal cycle only)
+// =============================================================================
 
-/**
- * Parse custom fields from checkout session.
- * Handles two formats:
- * 1. Separate fields keyed "tradingview_username" and "telegram_username"
- * 2. Single comma-separated string: "tvUsername, telegramUsername"
- */
+async function handleInvoicePaymentSucceeded(event: Stripe.Event): Promise<void> {
+  const invoice = event.data.object as Stripe.Invoice & {
+    subscription?: string | Stripe.Subscription | null;
+    billing_reason?: string | null;
+  };
+
+  if (invoice.billing_reason !== "subscription_cycle") {
+    console.log(
+      `invoice.payment_succeeded ignored (billing_reason=${invoice.billing_reason})`
+    );
+    return;
+  }
+
+  const customerId =
+    typeof invoice.customer === "string"
+      ? invoice.customer
+      : invoice.customer?.id;
+  if (!customerId) throw new Error("Invoice missing customer ID");
+
+  const existing = await findSubscriberByCustomerId(customerId);
+  if (!existing) {
+    throw new Error(`Renewal for unknown customer ${customerId}`);
+  }
+
+  // Re-confirm plan from invoice line price.
+  const linePriceId = invoice.lines?.data?.[0]?.price?.id;
+  const planType = linePriceId ? safeGetPlanType(linePriceId) || existing.planType : existing.planType;
+  const planName = getPlanDisplayName(planType);
+
+  // Period from invoice line (which mirrors the subscription cycle).
+  const linePeriod = invoice.lines?.data?.[0]?.period;
+  const startUnix = linePeriod?.start;
+  const endUnix = linePeriod?.end;
+  const startDate = startUnix ? formatDisplayDateSGT(startUnix) : existing.subscriptionStart;
+  const expiryDate = endUnix ? formatDisplayDateSGT(endUnix) : existing.subscriptionExpiry;
+
+  const newRenewalCount = parseRenewalCount(existing.renewalCount) + 1;
+
+  await updateSubscriberRow(existing.rowIndex, {
+    planType,
+    subscriptionStart: startDate,
+    subscriptionExpiry: expiryDate,
+    renewalCount: String(newRenewalCount),
+    changeType: "",
+  });
+
+  await notifyAdmin(
+    [
+      `<b>✅ SUBSCRIPTION RENEWED</b>`,
+      `Name: ${existing.customerName} | Plan: ${planName} (${planType})`,
+      `TradingView: ${existing.tradingViewUsername || "(not provided)"} | Telegram: @${existing.telegramUsername || "(not provided)"}`,
+      `New Start: ${startDate} → New Expiry: ${expiryDate}`,
+      `Renewal #: ${newRenewalCount}`,
+    ].join("\n")
+  );
+
+  console.log(`Renewal #${newRenewalCount} processed for ${customerId} (row ${existing.rowIndex})`);
+}
+
+// =============================================================================
+// Helpers
+// =============================================================================
+
+function getCustomerId(subscription: Stripe.Subscription): string {
+  return typeof subscription.customer === "string"
+    ? subscription.customer
+    : subscription.customer.id;
+}
+
+async function getCheckoutSession(
+  subscriptionId: string
+): Promise<Stripe.Checkout.Session | undefined> {
+  const sessions = await stripe().checkout.sessions.list({
+    subscription: subscriptionId,
+    limit: 1,
+  });
+  return sessions.data[0];
+}
+
+function safeGetPlanType(priceId: string | undefined): string | null {
+  if (!priceId) return null;
+  try {
+    return getPlanType(priceId);
+  } catch {
+    return null;
+  }
+}
+
+async function determineChangeType(
+  existing: ExistingSubscriber,
+  newPlanType: string
+): Promise<string> {
+  // Returning customer with different plan: compare by quarterly amount via Stripe prices.
+  // We look up both old and new prices via their plan-type → price-ID map (PRICE_TO_PLAN inverse).
+  // Falls back to "Switched Plan" if amounts are equal or lookup fails.
+  const oldPriceId = getPriceIdForPlan(existing.planType);
+  const newPriceId = getPriceIdForPlan(newPlanType);
+  if (!oldPriceId || !newPriceId) return "Switched Plan";
+
+  try {
+    const [oldPrice, newPrice] = await Promise.all([
+      stripe().prices.retrieve(oldPriceId),
+      stripe().prices.retrieve(newPriceId),
+    ]);
+    const oldAmount = oldPrice.unit_amount ?? 0;
+    const newAmount = newPrice.unit_amount ?? 0;
+    if (newAmount > oldAmount) return "Upgraded";
+    if (newAmount < oldAmount) return "Downgraded";
+    return "Switched Plan";
+  } catch (err) {
+    console.warn("determineChangeType price lookup failed:", err);
+    return "Switched Plan";
+  }
+}
+
+function parseRenewalCount(value: string): number {
+  const trimmed = (value || "").trim();
+  if (!trimmed || trimmed.toUpperCase() === "NA") return 0;
+  const n = parseInt(trimmed, 10);
+  return Number.isFinite(n) ? n : 0;
+}
+
 function parseCustomFields(
   session: Stripe.Checkout.Session | undefined
 ): { tvUsername: string; tgUsername: string } {
@@ -191,9 +643,6 @@ function parseCustomFields(
   }
 
   const fields = session.custom_fields;
-
-  // Try separate named fields first
-  // Stripe generates keys by lowercasing labels and removing spaces/special chars
   const tvField = fields.find((f) => f.key.includes("tradingview"));
   const tgField = fields.find((f) => f.key.includes("telegram"));
 
@@ -204,7 +653,6 @@ function parseCustomFields(
     };
   }
 
-  // Fallback: first field might be comma-separated "tvUser, tgUser"
   const combined = fields[0]?.text?.value || "";
   const parts = combined.split(",");
   return {
@@ -213,9 +661,6 @@ function parseCustomFields(
   };
 }
 
-/**
- * Fallback: calculate period end from subscription interval if current_period_end is missing.
- */
 function calculatePeriodEnd(subscription: Stripe.Subscription): number | null {
   const item = subscription.items?.data?.[0];
   if (!item?.price?.recurring) return null;
@@ -241,10 +686,6 @@ function calculatePeriodEnd(subscription: Stripe.Subscription): number | null {
   return Math.floor(start.getTime() / 1000);
 }
 
-/**
- * Format a Unix timestamp as "16 April 2026 18:00" in Singapore timezone (GMT+8).
- * Used for both Google Sheet and email display.
- */
 function formatDisplayDateSGT(unixSeconds: number): string {
   const date = new Date(unixSeconds * 1000);
   const formatter = new Intl.DateTimeFormat("en-GB", {
