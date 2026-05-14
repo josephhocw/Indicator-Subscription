@@ -132,7 +132,7 @@ export function getMarketLinks(planType: string): MarketLink[] {
 }
 
 // Fixed links
-export const MAIN_CHANNEL_LINK = "https://t.me/+k7DOWyTCSFBiMmU1";
+export const MAIN_CHANNEL_LINK = "https://t.me/+8YBVQvNryk43MWNl";
 export const BILLING_PORTAL_LINK =
   "https://billing.stripe.com/p/login/14A28tfhi79h9Mhfgk4ow00";
 
